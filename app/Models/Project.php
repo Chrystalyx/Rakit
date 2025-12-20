@@ -15,4 +15,9 @@ class Project extends Model
         'start_date' => 'date',
         'end_date' => 'date',
     ];
+
+    public function customer()
+    {
+        return $this->belongsTo(User::class, 'crafter_id');
+    }
 }
