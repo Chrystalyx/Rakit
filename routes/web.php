@@ -17,11 +17,14 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
-
-Route::get('/verification', [VerificationController::class, 'index'])->name('verification');
-
-Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
+    
+    Route::get('/verification', [VerificationController::class, 'index'])->name('verification.index');
+    Route::post('/verification/{id}/approve', [VerificationController::class, 'approve'])->name('verification.approve');
+    
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+});
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');

@@ -2,6 +2,7 @@ import AdminLayout from "@/Layouts/AdminLayout";
 import { Head } from "@inertiajs/react";
 import { useState } from "react";
 import OrderDetail from "./OrderDetail";
+import { Link } from "@inertiajs/react";
 
 export default function OrderIndex({ auth, orders }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -153,10 +154,32 @@ export default function OrderIndex({ auth, orders }) {
                                 </table>
                             </div>
 
-                            {/* Pagination Placeholder */}
-                            {orders && orders.links && (
-                                <div className="mt-4">Pagination Here</div>
-                            )}
+                            {/* BAGIAN PAGINATION YANG SUDAH DIPERBAIKI */}
+                            <div className="mt-6 flex justify-center">
+                                {orders.links.map((link, key) => {
+                                    if (link.url === null) {
+                                        return (
+                                            <span
+                                                key={key}
+                                                className="px-3 py-1 border rounded mx-1 text-sm text-gray-400 cursor-not-allowed"
+                                                dangerouslySetInnerHTML={{ __html: link.label }}
+                                            />
+                                        );
+                                    }
+
+                                    return (
+                                        <Link
+                                            key={key}
+                                            href={link.url}
+                                            className={`px-3 py-1 border rounded mx-1 text-sm transition-colors ${link.active
+                                                ? "bg-indigo-600 text-white border-indigo-600"
+                                                : "bg-white text-gray-700 hover:bg-gray-50 border-gray-300"
+                                                }`}
+                                            dangerouslySetInnerHTML={{ __html: link.label }}
+                                        />
+                                    );
+                                })}
+                            </div>
                         </div>
                     </div>
                 </div>
