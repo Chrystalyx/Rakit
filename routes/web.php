@@ -7,6 +7,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\VerificationController;
+use App\Http\Controllers\Admin\MaterialController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -18,12 +19,17 @@ Route::get('/', function () {
 });
 
 Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(function () {
+
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+
+    Route::patch('/materials/{material}/toggle', [MaterialController::class, 'toggle'])->name('materials.toggle');
+
+    Route::resource('materials', MaterialController::class)->except(['show']);
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
     
     Route::get('/verification', [VerificationController::class, 'index'])->name('verification.index');
     Route::post('/verification/{id}/approve', [VerificationController::class, 'approve'])->name('verification.approve');
     
-    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
 });
 
 Route::get('/dashboard', function () {
@@ -36,4 +42,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
