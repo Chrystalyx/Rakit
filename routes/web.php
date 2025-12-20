@@ -18,17 +18,17 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
+Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
 
-Route::get('/verification', [VerificationController::class, 'index'])->name('verification');
+    Route::get('/verification', [VerificationController::class, 'index'])->name('verification');
 
-Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
 
-Route::patch('/materials/{material}/toggle', [MaterialController::class, 'toggleStatus'])
-        ->name('materials.toggle');
-    
-    // Route CRUD standar (index, create, store, edit, update, destroy)
-    Route::resource('materials', MaterialController::class);
+    Route::patch('/materials/{material}/toggle', [MaterialController::class, 'toggle'])->name('materials.toggle');
+
+    Route::resource('materials', MaterialController::class)->except(['show']);
+});
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
@@ -40,4 +40,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

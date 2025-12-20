@@ -18,7 +18,7 @@ export default function CreateMaterial({ auth }) {
 
     const submit = (e) => {
         e.preventDefault();
-        post(route("materials.store"));
+        post(route("admin.materials.store"));
     };
 
     return (
@@ -178,7 +178,7 @@ export default function CreateMaterial({ auth }) {
                             {/* Action Buttons */}
                             <div className="flex items-center justify-end gap-4 border-t pt-6">
                                 <Link
-                                    href={route("materials.index")}
+                                    href={route("admin.materials.index")}
                                     className="text-gray-600 hover:text-gray-900 text-sm font-medium"
                                 >
                                     Batal

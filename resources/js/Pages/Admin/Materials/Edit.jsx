@@ -20,7 +20,7 @@ export default function EditMaterial({ auth, material }) {
     const submit = (e) => {
         e.preventDefault();
         // Menggunakan post dengan _method: PUT adalah cara standar menangani file upload saat update
-        post(route("materials.update", material.id));
+        post(route("admin.materials.update", material.id));
     };
 
     return (
@@ -159,7 +159,7 @@ export default function EditMaterial({ auth, material }) {
 
                             <div className="flex items-center justify-end gap-4 border-t pt-6">
                                 <Link
-                                    href={route("materials.index")}
+                                    href={route("admin.materials.index")}
                                     className="text-gray-600 hover:text-gray-900 text-sm font-medium"
                                 >
                                     Batal

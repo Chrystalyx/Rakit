@@ -47,7 +47,7 @@ export default function MaterialIndex({ auth, materials, filters }) {
     // Effect: Trigger reload saat queryParams berubah (Debounce Search)
     useEffect(() => {
         const timeoutId = setTimeout(() => {
-            router.get(route("materials.index"), queryParams, {
+            router.get(route("admin.materials.index"), queryParams, {
                 preserveState: true, // Jangan refresh full page
                 preserveScroll: true, // Jangan scroll ke atas
                 replace: true, // Jangan penuhi history browser
@@ -71,13 +71,13 @@ export default function MaterialIndex({ auth, materials, filters }) {
 
     const handleDelete = (id) => {
         if (confirm("Apakah Anda yakin ingin menghapus material ini?")) {
-            router.delete(route("materials.destroy", id));
+            router.delete(route("admin.materials.destroy", id));
         }
     };
 
     const handleToggle = (material) => {
         router.patch(
-            route("materials.toggle", material.id),
+            route("admin.materials.toggle", material.id),
             {},
             { preserveScroll: true }
         );
@@ -144,7 +144,7 @@ export default function MaterialIndex({ auth, materials, filters }) {
                         </div>
 
                         <Link
-                            href={route("materials.create")}
+                            href={route("admin.materials.create")}
                             className="px-4 py-2 bg-black text-white text-sm font-bold rounded-full hover:bg-gray-800 transition"
                         >
                             + Tambah Material
@@ -299,7 +299,7 @@ export default function MaterialIndex({ auth, materials, filters }) {
                                                     <div className="flex justify-center gap-2">
                                                         <Link
                                                             href={route(
-                                                                "materials.edit",
+                                                                "admin.materials.edit",
                                                                 item.id
                                                             )}
                                                             className="text-blue-600 hover:text-blue-900 font-medium text-sm border border-blue-200 px-3 py-1 rounded hover:bg-blue-50 transition"

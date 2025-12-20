@@ -3,97 +3,48 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Material;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
-use Illuminate\Pagination\LengthAwarePaginator; // Import wajib untuk pagination manual
 
 class MaterialController extends Controller
 {
-    // DATA DUMMY STATIC
-    private $dummyMaterials = [
-        [
-            'id' => 1,
-            'name' => 'Multiplek Meranti 18mm',
-            'category' => 'plywood',
-            'specification' => 'Grade A, Face mulus, back sanding',
-            'price' => 245000,
-            'unit' => 'Lembar',
-            'image' => 'https://placehold.co/100x100/png?text=Plywood',
-            'is_active' => true,
-        ],
-        [
-            'id' => 2,
-            'name' => 'HPL Taco TH-123 AA',
-            'category' => 'hpl',
-            'specification' => 'Solid Color, White Glossy, 0.7mm',
-            'price' => 185000,
-            'unit' => 'Lembar',
-            'image' => 'https://placehold.co/100x100/png?text=HPL',
-            'is_active' => true,
-        ],
-        [
-            'id' => 3,
-            'name' => 'Cat Duco Nippe 2000',
-            'category' => 'finishing',
-            'specification' => 'Warna Super White, Kaleng 1kg',
-            'price' => 85000,
-            'unit' => 'Kaleng',
-            'image' => 'https://placehold.co/100x100/png?text=Paint',
-            'is_active' => false,
-        ],
-        // Tambahan data agar pagination terlihat
-        [
-            'id' => 4,
-            'name' => 'Engsel Sendok Slow Motion',
-            'category' => 'hardware',
-            'specification' => 'Full bungkuk, soft close',
-            'price' => 15000,
-            'unit' => 'Pcs',
-            'image' => 'https://placehold.co/100x100/png?text=Hinge',
-            'is_active' => true,
-        ],
-    ];
-
     public function index(Request $request)
     {
-        // 1. Ubah Array jadi Collection Laravel
-        $materials = collect($this->dummyMaterials);
+        $search = $request->input('search');
+        $sortColumn = $request->input('sort', 'id');
+        $sortDirection = $request->input('direction', 'desc');
+        $validSortColumns = ['id', 'name', 'category', 'price', 'is_active'];
+        if (!in_array($sortColumn, $validSortColumns)) {
+            $sortColumn = 'id';
+        }
 
-        // 2. LOGIKA SEARCH (Filter by Name)
-        if ($search = $request->input('search')) {
-            $materials = $materials->filter(function ($item) use ($search) {
-                return false !== stripos($item['name'], $search); // Case-insensitive
+        $materials = Material::query()
+            ->when($search, function ($query, $search) {
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('specification', 'like', "%{$search}%");
+            })
+            ->orderBy($sortColumn, $sortDirection)
+            ->paginate(10)
+            ->withQueryString()
+            ->through(function ($material) {
+                return [
+                    'id' => $material->id,
+                    'name' => $material->name,
+                    'category' => $material->category,
+                    'specification' => $material->specification,
+                    'price' => (float) $material->price,
+                    'unit' => $material->unit,
+                    'is_active' => $material->is_active,
+                    'image' => $material->image_path
+                        ? asset('storage/' . $material->image_path)
+                        : 'https://placehold.co/400x400?text=No+Image',
+                ];
             });
-        }
-
-        // 3. LOGIKA SORTING
-        $sortField = $request->input('sort', 'id'); // Default sort by ID
-        $sortDirection = $request->input('direction', 'asc'); // Default Ascending
-
-        if ($sortDirection === 'desc') {
-            $materials = $materials->sortByDesc($sortField);
-        } else {
-            $materials = $materials->sortBy($sortField);
-        }
-
-        // Reset keys agar JSON array tetap rapi (0, 1, 2...)
-        $materials = $materials->values();
-
-        // 4. Manual Pagination (Simulasi DB Paginate)
-        $perPage = 10;
-        $currentPage = LengthAwarePaginator::resolveCurrentPage();
-        $currentItems = $materials->slice(($currentPage - 1) * $perPage, $perPage)->all();
-        
-        $paginatedItems = new LengthAwarePaginator(
-            $currentItems, 
-            count($materials), 
-            $perPage, 
-            $currentPage, 
-            ['path' => $request->url(), 'query' => $request->query()]
-        );
 
         return Inertia::render('Admin/Materials/index', [
-            'materials' => $paginatedItems,
+            'materials' => $materials,
             'filters' => $request->only(['search', 'sort', 'direction']),
         ]);
     }
@@ -106,40 +57,91 @@ class MaterialController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required',
-            'category' => 'required',
-            'price' => 'required|numeric',
-            'image' => 'nullable|image',
+            'name' => 'required|string|max:255',
+            'category' => 'required|string|in:plywood,hpl,finishing',
+            'specification' => 'nullable|string',
+            'price' => 'required|numeric|min:0',
+            'unit' => 'required|string|max:50',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
-        return redirect()->route('materials.index')
-            ->with('success', 'Material berhasil ditambahkan (Simulasi).');
+        $data = $request->except('image');
+        $data['is_active'] = true;
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('materials', 'public');
+            $data['image_path'] = $path;
+        }
+
+        Material::create($data);
+
+        return redirect()->route('admin.materials.index')
+            ->with('success', 'Material berhasil ditambahkan.');
     }
 
-    public function edit($id)
+    public function edit(Material $material)
     {
-        $material = collect($this->dummyMaterials)->firstWhere('id', (int)$id);
-        if (!$material) abort(404);
-
         return Inertia::render('Admin/Materials/Edit', [
-            'material' => $material
+            'material' => [
+                'id' => $material->id,
+                'name' => $material->name,
+                'category' => $material->category,
+                'specification' => $material->specification,
+                'price' => $material->price,
+                'unit' => $material->unit,
+                'image' => $material->image_path ? asset('storage/' . $material->image_path) : null,
+                'is_active' => $material->is_active,
+            ]
         ]);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, Material $material)
     {
-        return redirect()->route('materials.index')
-            ->with('success', 'Material berhasil diperbarui (Simulasi).');
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'category' => 'required|string|in:plywood,hpl,finishing',
+            'specification' => 'nullable|string',
+            'price' => 'required|numeric|min:0',
+            'unit' => 'required|string|max:50',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+        ]);
+
+        $data = $request->except('image');
+
+        if ($request->hasFile('image')) {
+            if ($material->image_path && Storage::disk('public')->exists($material->image_path)) {
+                Storage::disk('public')->delete($material->image_path);
+            }
+
+            $path = $request->file('image')->store('materials', 'public');
+            $data['image_path'] = $path;
+        }
+
+        $material->update($data);
+
+        return redirect()->route('admin.materials.index')
+            ->with('success', 'Material berhasil diperbarui.');
     }
 
-    public function destroy($id)
+    public function destroy(Material $material)
     {
-        return redirect()->route('materials.index')
-            ->with('success', 'Material berhasil dihapus (Simulasi).');
+        if ($material->image_path && Storage::disk('public')->exists($material->image_path)) {
+            Storage::disk('public')->delete($material->image_path);
+        }
+
+        $material->delete();
+
+        return redirect()->back()
+            ->with('success', 'Material berhasil dihapus.');
     }
 
-    public function toggleStatus($id)
+    public function toggle(Material $material)
     {
-        return back()->with('success', 'Status material berhasil diubah.');
+        $material->update([
+            'is_active' => !$material->is_active
+        ]);
+
+        return redirect()->back()
+            ->with('success', 'Status material diperbarui.');
     }
 }
