@@ -4,7 +4,9 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\AnalyticsController;
+use App\Http\Controllers\Admin\VerificationController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -16,6 +18,10 @@ Route::get('/', function () {
 });
 
 Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
+
+Route::get('/verification', [VerificationController::class, 'index'])->name('verification');
+
+Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
