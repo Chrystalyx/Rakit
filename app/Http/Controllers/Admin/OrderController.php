@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Project;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -10,58 +11,38 @@ class OrderController extends Controller
 {
     public function index()
     {
-        // DATA DUMMY STATIC (Untuk simulasi tampilan)
-        $orders = [
-            'data' => [
-                [
-                    'id' => 1001,
-                    'project_id' => 55,
-                    'customer_id' => 201,
-                    'customer_name' => 'Alice Wonder',
-                    'crafter_id' => 305,
-                    'crafter_name' => 'Budi Woodworks',
-                    'title' => 'Custom Teak Dining Table',
-                    'status' => 'on progress', // pending, on progress, completed, cancelled
-                    'total_amount' => 4500000,
-                    'platform_fee' => 45000, // Misal 1% fee
-                    'start_date' => '2024-12-01',
-                    'end_date' => '2024-12-15',
-                ],
-                [
-                    'id' => 1002,
-                    'project_id' => 56,
-                    'customer_id' => 202,
-                    'customer_name' => 'John Doe',
-                    'crafter_id' => 308,
-                    'crafter_name' => 'Siti Leather Craft',
-                    'title' => 'Handmade Leather Wallet Batch',
-                    'status' => 'pending',
-                    'total_amount' => 1250000,
-                    'platform_fee' => 12500,
-                    'start_date' => '2024-12-20',
-                    'end_date' => '2024-12-25',
-                ],
-                [
-                    'id' => 1003,
-                    'project_id' => 57,
-                    'customer_id' => 205,
-                    'customer_name' => 'Michael Smith',
-                    'crafter_id' => 305,
-                    'crafter_name' => 'Budi Woodworks',
-                    'title' => 'Minimalist Bookshelf',
-                    'status' => 'completed',
-                    'total_amount' => 2800000,
-                    'platform_fee' => 28000,
-                    'start_date' => '2024-11-10',
-                    'end_date' => '2024-11-20',
-                ],
-            ],
-            // Link pagination kosong agar tidak error di frontend
-            'links' => [], 
-        ];
+        $orders = Project::with(['customer', 'crafter'])
+            ->latest()
+            ->paginate(10)
+            ->through(function ($order) {
+                return [
+                    'id' => $order->id,
+                    'project_id' => $order->id,
+                    'title' => $order->title,
+                    'customer_id' => $order->customer_id,
+                    'customer_name' => $order->customer ? $order->customer->name : 'Deleted User',
+                    'crafter_id' => $order->crafter_id,
+                    'crafter_name' => $order->crafter ? $order->crafter->name : 'Menunggu Crafter',
+                    'total_amount' => $order->total_amount,
+                    'platform_fee' => $order->platform_fee,
+                    'status' => $this->normalizeStatus($order->status),
+                    'start_date' => $order->start_date,
+                    'end_date' => $order->end_date,
+                ];
+            });
 
         return Inertia::render('Admin/Orders/index', [
             'orders' => $orders
         ]);
+    }
+
+    private function normalizeStatus($status)
+    {
+        return match ($status) {
+            'pending_review' => 'pending',
+            'payment_pending' => 'pending',
+            'on_progress' => 'on progress',
+            default => $status,
+        };
     }
 }

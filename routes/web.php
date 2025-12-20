@@ -19,15 +19,17 @@ Route::get('/', function () {
 });
 
 Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
-
-    Route::get('/verification', [VerificationController::class, 'index'])->name('verification');
 
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
 
     Route::patch('/materials/{material}/toggle', [MaterialController::class, 'toggle'])->name('materials.toggle');
 
     Route::resource('materials', MaterialController::class)->except(['show']);
+    Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
+    
+    Route::get('/verification', [VerificationController::class, 'index'])->name('verification.index');
+    Route::post('/verification/{id}/approve', [VerificationController::class, 'approve'])->name('verification.approve');
+    
 });
 
 Route::get('/dashboard', function () {
