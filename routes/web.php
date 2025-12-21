@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\VerificationController;
 use App\Http\Controllers\Admin\MaterialController;
+use App\Http\Controllers\Admin\CrafterController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -30,6 +31,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::get('/verification', [VerificationController::class, 'index'])->name('verification.index');
     Route::post('/verification/{id}/approve', [VerificationController::class, 'approve'])->name('verification.approve');
     
+    Route::get('/crafters', [CrafterController::class, 'index'])->name('crafters.index');
 });
 
 Route::get('/dashboard', function () {

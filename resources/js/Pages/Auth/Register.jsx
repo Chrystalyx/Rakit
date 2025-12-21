@@ -76,7 +76,7 @@ export default function Register() {
                             >
                                 <path d="m15 18-6-6 6-6" />
                             </svg>
-                            Back to role selection
+                            Kembali ke pemilihan peran
                         </button>
                     ) : (
                         <Link
@@ -96,7 +96,7 @@ export default function Register() {
                             >
                                 <path d="m15 18-6-6 6-6" />
                             </svg>
-                            Back to login
+                            Kembali ke halaman login
                         </Link>
                     )}
                 </div>
@@ -106,10 +106,11 @@ export default function Register() {
                     <div className="animate-fade-in-up">
                         <div className="mb-8">
                             <h1 className="text-4xl font-bold text-gray-900 mb-2">
-                                Create Account
+                                Buat Akun
                             </h1>
                             <p className="text-gray-600">
-                                Choose how you want to join us today.
+                                Pilih cara Anda ingin bergabung dengan kami hari
+                                ini.
                             </p>
                         </div>
 
@@ -139,7 +140,7 @@ export default function Register() {
                                     Customer
                                 </h3>
                                 <p className="text-sm text-gray-500 mt-2">
-                                    I want to find and buy unique products.
+                                    Saya ingin mengkostum dan membeli produk.
                                 </p>
                             </div>
 
@@ -168,14 +169,14 @@ export default function Register() {
                                     Crafter
                                 </h3>
                                 <p className="text-sm text-gray-500 mt-2">
-                                    I want to sell my creations and services.
+                                    Saya ingin menjual karya dan layanan saya.
                                 </p>
                             </div>
                         </div>
 
                         <div className="mt-8 text-center">
                             <p className="text-sm text-gray-600">
-                                Already have an account?{" "}
+                                Sudah punya akun?{" "}
                                 <Link
                                     href={route("login")}
                                     className="font-bold text-black underline hover:no-underline"
@@ -190,13 +191,13 @@ export default function Register() {
                     <div className="animate-fade-in-up">
                         <div className="mb-6">
                             <h1 className="text-3xl font-bold text-gray-900 mb-1">
-                                Sign up as{" "}
+                                Daftar sebagai{" "}
                                 <span className="capitalize text-indigo-600">
                                     {selectedRole}
                                 </span>
                             </h1>
                             <p className="text-gray-500 text-sm">
-                                Please fill in your details to continue.
+                                Silakan isi form detail Anda untuk melanjutkan.
                             </p>
                         </div>
 

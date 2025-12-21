@@ -46,23 +46,23 @@ export default function Login({ status, canResetPassword }) {
                         href="/"
                         className="text-sm font-medium text-gray-600 hover:text-gray-900 flex items-center gap-2"
                     >
-                        &lt; Back to website
+                        &lt; Kembali
                     </Link>
                 </div>
 
                 {/* Judul */}
                 <div className="mb-8">
                     <h1 className="text-4xl font-bold text-gray-900 mb-2">
-                        Welcome!
+                        Selamat Datang!
                     </h1>
                     <p className="text-gray-600 text-sm">
                         <Link
                             href={route("register")}
                             className="font-bold text-black underline hover:no-underline"
                         >
-                            Create a free account
+                            Buat akun gratis{" "}
                         </Link>{" "}
-                        or log in to get started using SportWrench
+                        atau masuk untuk mulai menggunakan SportWrench{" "}
                     </p>
                 </div>
 
@@ -90,7 +90,7 @@ export default function Login({ status, canResetPassword }) {
                             autoComplete="username"
                             isFocused={true}
                             onChange={(e) => setData("email", e.target.value)}
-                            placeholder="chandler.blanks"
+                            placeholder="Masukan email anda"
                         />
                         <InputError message={errors.email} className="mt-2" />
                     </div>
@@ -171,7 +171,7 @@ export default function Login({ status, canResetPassword }) {
                                     href={route("password.request")}
                                     className="text-sm font-bold text-gray-600 underline hover:text-gray-900"
                                 >
-                                    Forgot password?
+                                    Lupa Password?
                                 </Link>
                             )}
                         </div>
