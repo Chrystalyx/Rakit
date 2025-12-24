@@ -12,12 +12,7 @@ use App\Http\Controllers\Admin\CrafterController;
 use App\Http\Controllers\Auth\SocialAuthController;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+    return Inertia::render('Customize/Index');
 });
 
 Route::middleware('guest')->group(function () {
