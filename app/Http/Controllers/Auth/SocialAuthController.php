@@ -46,6 +46,10 @@ class SocialAuthController extends Controller
 
             Auth::login($user);
 
+            if ($user->role === 'admin') {
+                return redirect()->intended(route('admin.analytics.index', absolute: false));
+            }
+
             return redirect()->intended(route('dashboard', absolute: false));
         } catch (\Exception $e) {
             return redirect()->route('login')->with('status', 'Login gagal atau dibatalkan.');
