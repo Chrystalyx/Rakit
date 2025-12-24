@@ -48,6 +48,8 @@ class SocialAuthController extends Controller
 
             if ($user->role === 'admin') {
                 return redirect()->intended(route('admin.analytics.index', absolute: false));
+            } elseif ($user->role === 'customer') {
+                return redirect()->intended(route('customer.dashboard', absolute: false));
             }
 
             return redirect()->intended(route('dashboard', absolute: false));

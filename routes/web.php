@@ -2,18 +2,30 @@
 
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Application;
 use App\Http\Controllers\ProfileController;
+
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\VerificationController;
 use App\Http\Controllers\Admin\MaterialController;
 use App\Http\Controllers\Admin\CrafterController;
+
 use App\Http\Controllers\Auth\SocialAuthController;
 
 Route::get('/', function () {
-    return Inertia::render('Customize/Index');
-});
+    return Inertia::render('Dashboard', [
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+    ]);
+})->name('home');
+
+Route::get('/Customize/Index', function () {
+    return Inertia::render('Customize/Index', [
+        'auth' => ['user' => Auth::user()]
+    ]);
+})->name('customize.index');
 
 Route::middleware('guest')->group(function () {
     Route::get('auth/{provider}/redirect', [SocialAuthController::class, 'redirect'])
@@ -36,6 +48,12 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::post('/verification/{id}/approve', [VerificationController::class, 'approve'])->name('verification.approve');
 
     Route::get('/crafters', [CrafterController::class, 'index'])->name('crafters.index');
+});
+
+Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->name('customer.')->group(function () {
+    Route::get('/dashboard', function () {
+        return Inertia::render('Customer/Dashboard');
+    })->name('dashboard');
 });
 
 Route::get('/dashboard', function () {
