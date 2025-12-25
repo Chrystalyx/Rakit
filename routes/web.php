@@ -9,10 +9,13 @@ use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\VerificationController;
 use App\Http\Controllers\Admin\MaterialController;
 use App\Http\Controllers\Admin\CrafterController;
+use App\Http\Controllers\ChatController;
+
 
 Route::get('/', function () {
-    return Inertia::render('Customize/Index');
+    return Inertia::render('Crafter/ProjectDetail');
 });
+
 
 Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(function () {
 
@@ -39,4 +42,16 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+Route::middleware(['auth', 'verified'])->group(function () {
+    
+    // Halaman Utama Chat (Menampilkan UI)
+    Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
+
+    // API: Ambil pesan dari user tertentu
+    Route::get('/chat/messages/{user}', [ChatController::class, 'getMessages'])->name('chat.getMessages');
+
+    // API: Kirim pesan ke user tertentu
+    Route::post('/chat/messages/{user}', [ChatController::class, 'sendMessage'])->name('chat.sendMessage');
+
+});
 require __DIR__ . '/auth.php';
