@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\MaterialController;
 use App\Http\Controllers\Admin\CrafterController as AdminCrafterController;
 
 use App\Http\Controllers\Crafter\DashboardController as CrafterDashboardController;
+use App\Http\Controllers\Crafter\PublicCrafterController;
 
 Route::get('/', function () {
     return Inertia::render('Dashboard', [
@@ -39,6 +40,9 @@ Route::get('/Customize/Index', function () {
         'auth' => ['user' => Auth::user()]
     ]);
 })->name('customize.index');
+
+Route::get('/crafters', [PublicCrafterController::class, 'index'])->name('public.crafters.index');
+Route::get('/crafter/{id}', [PublicCrafterController::class, 'show'])->name('public.crafters.show');
 
 
 Route::middleware('guest')->group(function () {
