@@ -62,7 +62,7 @@ class MaterialController extends Controller
             'specification' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'unit' => 'required|string|max:50',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:16384',
         ]);
 
         $data = $request->except('image');
@@ -103,7 +103,7 @@ class MaterialController extends Controller
             'specification' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'unit' => 'required|string|max:50',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:16384',
         ]);
 
         $data = $request->except('image');

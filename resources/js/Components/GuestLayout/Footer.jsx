@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
+import PrivacyPolicyModal from "@/Components/Modals/PrivacyPolicyModal";
+import TermsOfServiceModal from "@/Components/Modals/TermsOfServiceModal";
 import {
     Instagram,
     Twitter,
@@ -9,6 +11,9 @@ import {
 } from "lucide-react";
 
 export default function Footer() {
+    const [showPrivacy, setShowPrivacy] = useState(false);
+    const [showTerms, setShowTerms] = useState(false);
+
     return (
         <footer className="bg-rakit-50 border-t border-rakit-200 pt-20 pb-10">
             <div className="max-w-7xl mx-auto px-6">
@@ -103,8 +108,9 @@ export default function Footer() {
                                     className="text-rakit-500 shrink-0 mt-0.5"
                                 />
                                 <span>
-                                    Jl. Furniture No. 88, Bandung, Jawa Barat
-                                    40132
+                                    Jl. Khp Hasan Mustopa No.14, RT.01/RW.15
+                                    Kel, Cikutra, Kec. Cibeunying Kidul, Kota
+                                    Bandung, Jawa Barat 40124
                                 </span>
                             </li>
                             <li className="flex items-center gap-3">
@@ -113,10 +119,10 @@ export default function Footer() {
                                     className="text-rakit-500 shrink-0"
                                 />
                                 <a
-                                    href="mailto:support@rakit.id"
+                                    href="mailto:rakitkabinet@gmail.com"
                                     className="hover:text-rakit-800"
                                 >
-                                    support@rakit.id
+                                    rakitkabinet@gmail.com
                                 </a>
                             </li>
                             <li className="flex items-center gap-3">
@@ -136,14 +142,31 @@ export default function Footer() {
                         rights reserved.
                     </p>
                     <p className="flex gap-6">
-                        <a href="#" className="hover:text-rakit-800">
+                        {/* Button ini sudah benar untuk trigger modal */}
+                        <button
+                            onClick={() => setShowPrivacy(true)}
+                            className="hover:text-rakit-800 transition-colors"
+                        >
                             Privacy Policy
-                        </a>
-                        <a href="#" className="hover:text-rakit-800">
+                        </button>
+                        <button
+                            onClick={() => setShowTerms(true)}
+                            className="hover:text-rakit-800 transition-colors"
+                        >
                             Terms of Service
-                        </a>
+                        </button>
                     </p>
                 </div>
+
+                <PrivacyPolicyModal
+                    isOpen={showPrivacy}
+                    onClose={() => setShowPrivacy(false)}
+                />
+
+                <TermsOfServiceModal
+                    isOpen={showTerms}
+                    onClose={() => setShowTerms(false)}
+                />
             </div>
         </footer>
     );
