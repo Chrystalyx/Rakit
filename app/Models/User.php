@@ -52,4 +52,16 @@ class User extends Authenticatable
     {
         return $this->hasOne(CrafterProfile::class);
     }
+
+    // Pesan yang dikirim oleh user ini
+    public function sentMessages()
+    {
+        return $this->hasMany(Message::class, 'sender_id');
+    }
+
+    // Pesan yang diterima oleh user ini
+    public function receivedMessages()
+    {
+        return $this->hasMany(Message::class, 'receiver_id');
+    }
 }

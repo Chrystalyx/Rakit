@@ -26,12 +26,18 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectUsersTo(function (Request $request) {
             $user = Auth::user();
 
-            if ($user && $user->role === 'admin') {
-                return route('admin.analytics.index');
-            }
+            if ($user) {
+                if ($user->role === 'admin') {
+                    return route('admin.analytics.index');
+                }
 
-            if ($user && $user->role === 'customer') {
-                return route('customer.dashboard');
+                if ($user->role === 'customer') {
+                    return route('customer.dashboard');
+                }
+
+                if ($user->role === 'crafter') {
+                    return route('crafter.dashboard');
+                }
             }
 
             return route('dashboard');
