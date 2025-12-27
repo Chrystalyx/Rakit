@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import GuestLayout from "../Layouts/GuestLayout";
+import GuestLayout from "../../Layouts/GuestLayout";
 import {
     Hammer,
     ShieldCheck,

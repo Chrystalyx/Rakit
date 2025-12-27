@@ -116,7 +116,7 @@ export default function AdminLayout({ children, user }) {
 
     // Daftar Menu Navigasi
     const navigation = [
-        { name: "Dashboard", href: "/admin/analytics", icon: Icons.Dashboard },
+        { name: "Analytics", href: "/admin/analytics", icon: Icons.Dashboard },
         { name: "Materials", href: "/admin/materials", icon: Icons.Materials }, // Database harga
         { name: "Orders", href: "/admin/orders", icon: Icons.Orders }, // Kelola proyek & RAB
         {

@@ -18,6 +18,11 @@ class Project extends Model
 
     public function customer()
     {
+        return $this->belongsTo(User::class, 'customer_id');
+    }
+
+    public function crafter()
+    {
         return $this->belongsTo(User::class, 'crafter_id');
     }
 }
