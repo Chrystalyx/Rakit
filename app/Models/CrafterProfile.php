@@ -30,4 +30,9 @@ class CrafterProfile extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function portfolios()
+    {
+        return $this->hasMany(Portfolio::class, 'crafter_profile_id');
+    }
 }
