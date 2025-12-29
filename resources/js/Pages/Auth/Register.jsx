@@ -4,10 +4,11 @@ import PrimaryButton from "@/Components/PrimaryButton";
 import TextInput from "@/Components/TextInput";
 import { Head, Link, useForm } from "@inertiajs/react";
 import { useState, useEffect } from "react";
-import RegisterImage from "../../../images/Register.jpg"; // Pastikan path ini sesuai gambar Anda
+import RegisterImage from "../../../images/Register.jpg";
+import { Toaster, toast } from "react-hot-toast";
 
 export default function Register() {
-    // State untuk mengontrol tampilan (null = pilih role, 'customer'/'crafter' = isi form)
+    // State untuk mengontrol tampilan
     const [selectedRole, setSelectedRole] = useState(null);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -34,10 +35,25 @@ export default function Register() {
         e.preventDefault();
         post(route("register"), {
             onFinish: () => reset("password", "password_confirmation"),
+            // Logika Alert Khusus Crafter vs Customer
+            onSuccess: () => {
+                if (selectedRole === "crafter") {
+                    toast.success(
+                        "Terima kasih sudah mendaftar! Akun Anda sedang menunggu konfirmasi lebih lanjut dari Admin.",
+                        { duration: 6000 } // Durasi lebih lama agar sempat terbaca
+                    );
+                } else {
+                    toast.success("Registrasi berhasil! Selamat datang.");
+                }
+            },
+            onError: (errors) => {
+                toast.error(
+                    "Registrasi gagal. Mohon periksa kembali data Anda."
+                );
+            },
         });
     };
 
-    // Fungsi helper untuk memilih role
     const handleRoleSelect = (role) => {
         setSelectedRole(role);
     };
@@ -45,6 +61,8 @@ export default function Register() {
     return (
         <div className="flex min-h-screen w-full bg-white">
             <Head title="Register" />
+
+            <Toaster position="top-center" reverseOrder={false} />
 
             <div className="hidden lg:flex w-1/2 max-h-screen bg-gray-50 items-center justify-center relative overflow-hidden p-6">
                 <img
@@ -54,9 +72,7 @@ export default function Register() {
                 />
             </div>
 
-            {/* KOLOM KANAN: Konten */}
             <div className="w-full lg:w-1/2 flex flex-col justify-center px-8 md:px-16 lg:px-24 py-12 overflow-y-auto max-h-screen">
-                {/* Header Navigasi */}
                 <div className="mb-6">
                     {selectedRole ? (
                         <button
@@ -101,7 +117,6 @@ export default function Register() {
                     )}
                 </div>
 
-                {/* LOGIKA TAMPILAN: Jika belum pilih role, tampilkan kartu pilihan */}
                 {!selectedRole ? (
                     <div className="animate-fade-in-up">
                         <div className="mb-8">
@@ -115,7 +130,6 @@ export default function Register() {
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {/* Card Customer */}
                             <div
                                 onClick={() => handleRoleSelect("customer")}
                                 className="cursor-pointer group relative rounded-2xl border-2 border-gray-200 p-6 hover:border-black transition-all duration-300 hover:shadow-lg"
@@ -144,7 +158,6 @@ export default function Register() {
                                 </p>
                             </div>
 
-                            {/* Card Crafter */}
                             <div
                                 onClick={() => handleRoleSelect("crafter")}
                                 className="cursor-pointer group relative rounded-2xl border-2 border-gray-200 p-6 hover:border-black transition-all duration-300 hover:shadow-lg"
@@ -187,7 +200,6 @@ export default function Register() {
                         </div>
                     </div>
                 ) : (
-                    /* FORM REGISTRASI (Muncul setelah role dipilih) */
                     <div className="animate-fade-in-up">
                         <div className="mb-6">
                             <h1 className="text-3xl font-bold text-gray-900 mb-1">
@@ -202,7 +214,6 @@ export default function Register() {
                         </div>
 
                         <form onSubmit={submit} className="space-y-4">
-                            {/* Common Fields: Name */}
                             <div>
                                 <InputLabel
                                     htmlFor="name"
@@ -227,7 +238,6 @@ export default function Register() {
                                 />
                             </div>
 
-                            {/* Common Fields: Email */}
                             <div>
                                 <InputLabel
                                     htmlFor="email"
@@ -252,7 +262,6 @@ export default function Register() {
                                 />
                             </div>
 
-                            {/* CRAFTER SPECIFIC FIELDS */}
                             {selectedRole === "crafter" && (
                                 <>
                                     <div>
@@ -283,7 +292,6 @@ export default function Register() {
                                 </>
                             )}
 
-                            {/* Common Fields: Phone */}
                             <div>
                                 <InputLabel
                                     htmlFor="phone"
@@ -307,7 +315,6 @@ export default function Register() {
                                 />
                             </div>
 
-                            {/* CRAFTER SPECIFIC FIELDS (Address) */}
                             {selectedRole === "crafter" && (
                                 <div>
                                     <InputLabel
@@ -333,7 +340,6 @@ export default function Register() {
                                 </div>
                             )}
 
-                            {/* Common Fields: Password */}
                             <div className="relative">
                                 <InputLabel
                                     htmlFor="password"
@@ -406,7 +412,6 @@ export default function Register() {
                                 />
                             </div>
 
-                            {/* Common Fields: Confirm Password */}
                             <div className="relative">
                                 <InputLabel
                                     htmlFor="password_confirmation"

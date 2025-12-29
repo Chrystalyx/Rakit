@@ -47,22 +47,6 @@ const BASE_OPTIONS = [
 // 2. DATA FINISHING HPL (Visual Luar) -> Ubah Gambar
 const FINISH_OPTIONS = [
     {
-        id: "hpl-wood-1",
-        name: "Folk Walnut",
-        type: "Ultimate HPL",
-        price: 450000,
-        texture:
-            "https://images.unsplash.com/photo-1611486212557-88be5ff6f941?q=80&w=500&auto=format&fit=crop",
-    },
-    {
-        id: "hpl-wood-2",
-        name: "Ash Twill",
-        type: "Ultimate HPL",
-        price: 480000,
-        texture:
-            "https://images.unsplash.com/photo-1519962533807-374c8104e1a0?q=80&w=500&auto=format&fit=crop",
-    },
-    {
         id: "hpl-solid-1",
         name: "Deep Night",
         type: "Special HPL",

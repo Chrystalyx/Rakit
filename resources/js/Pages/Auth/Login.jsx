@@ -6,6 +6,7 @@ import TextInput from "@/Components/TextInput";
 import { Head, Link, useForm } from "@inertiajs/react";
 import { useState } from "react";
 import LoginImage from "../../../images/Login.jpg";
+import { Toaster, toast } from "react-hot-toast";
 
 export default function Login({ status, canResetPassword }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -14,13 +15,18 @@ export default function Login({ status, canResetPassword }) {
         remember: false,
     });
 
-    // State untuk fitur lihat password (ikon mata)
     const [showPassword, setShowPassword] = useState(false);
 
     const submit = (e) => {
         e.preventDefault();
         post(route("login"), {
             onFinish: () => reset("password"),
+            onSuccess: () => {
+                toast.success("Login berhasil!");
+            },
+            onError: () => {
+                toast.error("Login gagal. Periksa email atau password Anda.");
+            },
         });
     };
 
@@ -28,9 +34,9 @@ export default function Login({ status, canResetPassword }) {
         <div className="flex min-h-screen w-full bg-white">
             <Head title="Log in" />
 
-            {/* KOLOM KIRI: Gambar/Artwork */}
+            <Toaster position="top-center" reverseOrder={false} />
+
             <div className="hidden lg:flex w-1/2 max-h-screen bg-gray-50 items-center justify-center relative overflow-hidden p-6">
-                {/* Ganti src ini dengan path gambar geometris Anda */}
                 <img
                     src={LoginImage}
                     alt="Abstract Design"
@@ -38,9 +44,7 @@ export default function Login({ status, canResetPassword }) {
                 />
             </div>
 
-            {/* KOLOM KANAN: Form */}
             <div className="w-full lg:w-1/2 flex flex-col justify-center px-8 md:px-16 lg:px-24 py-12">
-                {/* Header Navigasi */}
                 <div className="mb-10">
                     <Link
                         href="/"
@@ -50,7 +54,6 @@ export default function Login({ status, canResetPassword }) {
                     </Link>
                 </div>
 
-                {/* Judul */}
                 <div className="mb-8">
                     <h1 className="text-4xl font-bold text-gray-900 mb-2">
                         Selamat Datang!
@@ -66,7 +69,6 @@ export default function Login({ status, canResetPassword }) {
                     </p>
                 </div>
 
-                {/* Status Message */}
                 {status && (
                     <div className="mb-4 text-sm font-medium text-green-600">
                         {status}
@@ -74,7 +76,6 @@ export default function Login({ status, canResetPassword }) {
                 )}
 
                 <form onSubmit={submit} className="space-y-5">
-                    {/* Input Email */}
                     <div>
                         <InputLabel
                             htmlFor="email"
@@ -95,7 +96,6 @@ export default function Login({ status, canResetPassword }) {
                         <InputError message={errors.email} className="mt-2" />
                     </div>
 
-                    {/* Input Password */}
                     <div>
                         <InputLabel
                             htmlFor="password"
@@ -115,7 +115,6 @@ export default function Login({ status, canResetPassword }) {
                                 }
                                 placeholder="• • • • • • • •"
                             />
-                            {/* Tombol Mata (Toggle Visibility) */}
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
@@ -164,7 +163,6 @@ export default function Login({ status, canResetPassword }) {
                             className="mt-2"
                         />
 
-                        {/* Forgot Password Link - Kanan Bawah Input */}
                         <div className="flex justify-end mt-2">
                             {canResetPassword && (
                                 <Link
@@ -177,14 +175,13 @@ export default function Login({ status, canResetPassword }) {
                         </div>
                     </div>
 
-                    {/* Tombol Login Utama */}
                     <PrimaryButton
                         className="w-full justify-center rounded-full bg-black py-4 text-white hover:bg-gray-800"
                         disabled={processing}
                     >
                         Log in
                     </PrimaryButton>
-                    {/* Garis Pembatas dengan teks */}
+
                     <div className="relative flex py-5 items-center">
                         <div className="flex-grow border-t border-gray-200"></div>
                         <span className="flex-shrink-0 mx-4 text-gray-400 text-[5px] sm:text-xs uppercase tracking-widest font-semibold">
@@ -192,15 +189,13 @@ export default function Login({ status, canResetPassword }) {
                         </span>
                         <div className="flex-grow border-t border-gray-200"></div>
                     </div>
-                    {/* Tombol Login Social (Google & Facebook) */}
+
                     <div className="space-y-3 mt-4">
-                        {/* Tombol Google */}
                         <a
                             href={route("social.redirect", "google")}
                             className="flex w-full items-center justify-center gap-3 rounded-full border border-gray-300 bg-white py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition cursor-pointer"
                         >
                             <svg className="h-5 w-5" viewBox="0 0 24 24">
-                                {/* ... path icon google ... */}
                                 <path
                                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                                     fill="#4285F4"
@@ -221,7 +216,6 @@ export default function Login({ status, canResetPassword }) {
                             Log in with Google
                         </a>
 
-                        {/* Tombol Facebook */}
                         <a
                             href={route("social.redirect", "facebook")}
                             className="flex w-full items-center justify-center gap-3 rounded-full border border-gray-300 bg-white py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition cursor-pointer"
