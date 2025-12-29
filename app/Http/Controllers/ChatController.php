@@ -7,6 +7,7 @@ use App\Models\Message;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use App\Notifications\SystemNotification;
 
 class ChatController extends Controller
 {
@@ -86,7 +87,6 @@ class ChatController extends Controller
         return response()->json($messages);
     }
 
-    // 3. Mengirim Pesan Baru (API)
     public function sendMessage(Request $request, string $userId)
     {
         $request->validate([
@@ -96,10 +96,23 @@ class ChatController extends Controller
         try {
             $message = Message::create([
                 'sender_id' => Auth::id(),
-                'receiver_id' => (int) $userId, // Pastikan jadi integer
+                'receiver_id' => (int) $userId,
                 'message' => $request->message,
                 'type' => 'text',
             ]);
+
+            $receiver = User::find($userId);
+            /** @var \App\Models\User $sender */
+            $sender = Auth::user();
+
+            if ($receiver) {
+                $receiver->notify(new SystemNotification([
+                    'title' => 'Pesan Baru',
+                    'message' => "{$sender->name}: " . substr($request->message, 0, 30) . "...",
+                    'url' => route('chat.index', ['chat_with' => $sender->id]),
+                    'type' => 'chat'
+                ]));
+            }
 
             return response()->json([
                 'id' => $message->id,
@@ -110,7 +123,6 @@ class ChatController extends Controller
                 'type' => 'text'
             ]);
         } catch (\Exception $e) {
-            // Ini akan membantu debugging jika masih error
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }

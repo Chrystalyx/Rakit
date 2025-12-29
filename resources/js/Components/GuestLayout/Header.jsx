@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, User, LogOut, ChevronDown, Bell } from "lucide-react";
 import { Link, usePage } from "@inertiajs/react";
@@ -6,33 +6,43 @@ import NotificationDropdown from "@/Components/NotificationDropdown";
 
 export default function Header() {
     const [isOpen, setIsOpen] = useState(false);
-
     const [activeDropdown, setActiveDropdown] = useState(null);
 
     const { auth } = usePage().props;
     const user = auth.user;
 
-    const navLinks = [
-        {
-            name: "Beranda",
-            href:
-                user?.role === "customer"
-                    ? "/customer/dashboard"
-                    : "/dashboard",
-        },
-        { name: "Rakit Kabinet", href: "/Customize/Index" },
-        { name: "Pengrajin", href: "#" },
-        { name: "Lihat Progress", href: "#" },
-        { name: "History Transaksi", href: "#" },
-        { name: "Tentang Kami", href: "#" },
-    ];
+    const navLinks = useMemo(() => {
+        if (!user) {
+            return [
+                { name: "Beranda", href: "/" },
+                { name: "Rakit Kabinet", href: "/Customize/Index" },
+                { name: "Pengrajin", href: "/crafters" },
+            ];
+        }
 
-    // Helper untuk toggle dropdown
+        if (user.role === "crafter") {
+            return [
+                { name: "Portofolio", href: "/crafter/dashboard" },
+                { name: "Rakit Kabinet", href: "/Customize/Index" },
+                { name: "Project List", href: "#" },
+                { name: "History Transaksi", href: "#" },
+            ];
+        }
+
+        return [
+            { name: "Beranda", href: "/dashboard" },
+            { name: "Rakit Kabinet", href: "/Customize/Index" },
+            { name: "Pengrajin", href: "/crafters" },
+            { name: "Lihat Progress", href: "#" },
+            { name: "History Transaksi", href: "#" },
+        ];
+    }, [user]);
+
     const toggleDropdown = (name) => {
         if (activeDropdown === name) {
-            setActiveDropdown(null); // Tutup jika diklik lagi
+            setActiveDropdown(null);
         } else {
-            setActiveDropdown(name); // Buka yang diklik, otomatis tutup yang lain
+            setActiveDropdown(name);
         }
     };
 
@@ -47,23 +57,26 @@ export default function Header() {
                 <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
                     {/* Brand */}
                     <div className="flex items-center gap-3">
-                        <img
-                            src="/images/RakitLogo.png"
-                            alt="Rakit Logo"
-                            className="w-14 h-14 rounded-2xl object-contain shadow-lg shadow-rakit-800/10 bg-white p-1"
-                        />
-                        <span className="text-2xl font-bold text-rakit-800 tracking-tight">
+                        <Link href="/">
+                            <img
+                                src="/images/RakitLogo.png"
+                                alt="Rakit Logo"
+                                className="w-14 h-14 rounded-2xl object-contain shadow-lg shadow-rakit-800/10 bg-white p-1"
+                            />
+                        </Link>
+                        <Link href="/" className="text-2xl font-bold text-rakit-800 tracking-tight">
                             RAKIT
-                        </span>
+                        </Link>
                     </div>
 
-                    {/* Desktop Navigation */}
+                    {/* Desktop Navigation (Dinamis) */}
                     <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600">
                         {navLinks.map((item) => (
                             <Link
                                 key={item.name}
                                 href={item.href}
-                                className="hover:text-rakit-500 transition-colors relative group"
+                                className={`hover:text-rakit-500 transition-colors relative group ${route().current(item.href) ? "text-rakit-800 font-bold" : ""
+                                    }`}
                             >
                                 {item.name}
                                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-rakit-500 transition-all group-hover:w-full"></span>
@@ -75,30 +88,36 @@ export default function Header() {
                     <div className="hidden md:flex items-center gap-4">
                         {user ? (
                             <>
-                                {/* --- KOMPONEN NOTIFIKASI BARU --- */}
-                                <NotificationDropdown
-                                    isOpen={activeDropdown === "notification"}
-                                    onToggle={() =>
-                                        toggleDropdown("notification")
-                                    }
-                                />
-                                {/* -------------------------------- */}
+                                {/* --- NOTIFIKASI (Hanya muncul jika user login) --- */}
+                                <div className="relative">
+                                    <button
+                                        onClick={() => toggleDropdown("notification")}
+                                        className="p-2 text-gray-600 hover:text-rakit-800 hover:bg-rakit-200 rounded-full transition relative"
+                                    >
+                                        <Bell size={20} />
+                                        {/* Menggunakan data unread dari Global Shared Props (HandleInertiaRequests) */}
+                                        {auth.unread_notifications_count > 0 && (
+                                            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white animate-pulse"></span>
+                                        )}
+                                    </button>
+
+                                    <NotificationDropdown
+                                        isOpen={activeDropdown === "notification"}
+                                        onToggle={() => toggleDropdown("notification")}
+                                    />
+                                </div>
+                                {/* --------------------------------------------- */}
 
                                 <div className="relative">
                                     <button
-                                        onClick={() =>
-                                            toggleDropdown("profile")
-                                        }
+                                        onClick={() => toggleDropdown("profile")}
                                         className="flex items-center gap-2 text-sm font-semibold text-rakit-800 hover:text-rakit-600 transition focus:outline-none pl-2 border-l border-gray-300 ml-1"
                                     >
-                                        <span>Hello, {user.name}</span>
+                                        <span>Halo, {user.name}</span>
                                         <ChevronDown
                                             size={16}
-                                            className={`transition-transform duration-200 ${
-                                                activeDropdown === "profile"
-                                                    ? "rotate-180"
-                                                    : ""
-                                            }`}
+                                            className={`transition-transform duration-200 ${activeDropdown === "profile" ? "rotate-180" : ""
+                                                }`}
                                         />
                                     </button>
 
@@ -153,6 +172,7 @@ export default function Header() {
 
                     {/* Mobile Menu Button */}
                     <div className="md:hidden flex items-center gap-3">
+                        {/* Notifikasi Mobile (Hanya jika login) */}
                         {user && (
                             <Link
                                 href="/notifications"
@@ -173,6 +193,7 @@ export default function Header() {
                 </div>
             </motion.header>
 
+            {/* Mobile Menu Drawer */}
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
@@ -182,6 +203,7 @@ export default function Header() {
                         className="md:hidden bg-rakit-100 border-b border-rakit-300 overflow-hidden sticky top-[88px] z-40"
                     >
                         <div className="px-6 py-6 space-y-4">
+                            {/* Render Menu Dinamis di Mobile */}
                             {navLinks.map((item) => (
                                 <Link
                                     key={item.name}
@@ -198,7 +220,7 @@ export default function Header() {
                                 {user ? (
                                     <div className="space-y-3">
                                         <div className="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-2">
-                                            Account ({user.name})
+                                            Akun ({user.name})
                                         </div>
                                         <Link
                                             href="/profile"
@@ -214,7 +236,7 @@ export default function Header() {
                                             className="flex items-center justify-center gap-3 w-full px-6 py-3 rounded-xl bg-red-50 border border-red-200 text-red-600 font-semibold hover:bg-red-100 transition"
                                         >
                                             <LogOut size={18} />
-                                            Logout
+                                            Keluar
                                         </Link>
                                     </div>
                                 ) : (

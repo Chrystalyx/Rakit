@@ -55,10 +55,10 @@ class SocialAuthController extends Controller
             }
 
             if ($user->role === 'customer') {
-                return redirect()->intended(route('customer.dashboard', absolute: false));
+                return redirect()->intended(route('dashboard', absolute: false));
             }
 
-            return redirect()->intended(route('dashboard', absolute: false));
+            return redirect()->intended(route('home', absolute: false));
         } catch (\Exception $e) {
             return redirect()->route('login')->with('status', 'Login gagal atau dibatalkan.');
         }

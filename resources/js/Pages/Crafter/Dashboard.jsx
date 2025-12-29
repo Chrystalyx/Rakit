@@ -11,7 +11,7 @@ import {
     TrendingUp,
 } from "lucide-react";
 
-export default function DashboardCrafter() {
+export default function Dashboard({ crafter, activeProjects, newRequests }) {
     return (
         <GuestLayout>
             <Head title="Dashboard Mitra - Rakit" />

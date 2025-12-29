@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\CrafterProfile;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Notifications\SystemNotification;
 
 class VerificationController extends Controller
 {
@@ -21,7 +22,8 @@ class VerificationController extends Controller
             ->paginate(10)
             ->through(function ($user) {
                 return [
-                    'id' => $user->id,
+                    'id' => $user->crafterProfile->id,
+                    'user_id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
                     'phone' => $user->phone_number,
@@ -38,21 +40,18 @@ class VerificationController extends Controller
 
     public function approve($id)
     {
-        $user = User::findOrFail($id);
+        $profile = CrafterProfile::with('user')->findOrFail($id);
+        $profile->update(['is_verified' => true]);
 
-        if ($user->crafterProfile) {
-            $user->crafterProfile->update([
-                'is_verified' => true,
-                'status' => 'active'
-            ]);
-        } else {
-            CrafterProfile::create([
-                'user_id' => $user->id,
-                'is_verified' => true,
-                'level' => 'pemula'
-            ]);
+        if ($profile->user) {
+            $profile->user->notify(new SystemNotification([
+                'title' => 'Akun Terverifikasi!',
+                'message' => 'Selamat! Akun Anda telah diverifikasi oleh Admin. Anda sekarang bisa menerima proyek.',
+                'url' => route('crafter.dashboard'),
+                'type' => 'verified'
+            ]));
         }
 
-        return redirect()->back()->with('success', 'Mitra berhasil diverifikasi.');
+        return back()->with('success', 'Crafter berhasil diverifikasi.');
     }
 }
