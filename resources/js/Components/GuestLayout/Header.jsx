@@ -1,18 +1,24 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, User, LogOut, ChevronDown } from "lucide-react";
+import { Menu, X, User, LogOut, ChevronDown, Bell } from "lucide-react";
 import { Link, usePage } from "@inertiajs/react";
+import NotificationDropdown from "@/Components/NotificationDropdown";
 
 export default function Header() {
     const [isOpen, setIsOpen] = useState(false);
-    const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+    const [activeDropdown, setActiveDropdown] = useState(null);
+
     const { auth } = usePage().props;
     const user = auth.user;
 
     const navLinks = [
         {
             name: "Beranda",
-            href: user?.role === 'customer' ? "/customer/dashboard" : "/dashboard"
+            href:
+                user?.role === "customer"
+                    ? "/customer/dashboard"
+                    : "/dashboard",
         },
         { name: "Rakit Kabinet", href: "/Customize/Index" },
         { name: "Pengrajin", href: "#" },
@@ -20,6 +26,15 @@ export default function Header() {
         { name: "History Transaksi", href: "#" },
         { name: "Tentang Kami", href: "#" },
     ];
+
+    // Helper untuk toggle dropdown
+    const toggleDropdown = (name) => {
+        if (activeDropdown === name) {
+            setActiveDropdown(null); // Tutup jika diklik lagi
+        } else {
+            setActiveDropdown(name); // Buka yang diklik, otomatis tutup yang lain
+        }
+    };
 
     return (
         <>
@@ -59,46 +74,65 @@ export default function Header() {
                     {/* Desktop Auth / User Dropdown */}
                     <div className="hidden md:flex items-center gap-4">
                         {user ? (
-                            <div className="relative">
-                                <button
-                                    onClick={() => setIsProfileOpen(!isProfileOpen)}
-                                    className="flex items-center gap-2 text-sm font-semibold text-rakit-800 hover:text-rakit-600 transition focus:outline-none"
-                                >
-                                    <span>Hello, {user.name}</span>
-                                    <ChevronDown size={16} className={`transition-transform duration-200 ${isProfileOpen ? "rotate-180" : ""}`} />
-                                </button>
+                            <>
+                                {/* --- KOMPONEN NOTIFIKASI BARU --- */}
+                                <NotificationDropdown
+                                    isOpen={activeDropdown === "notification"}
+                                    onToggle={() =>
+                                        toggleDropdown("notification")
+                                    }
+                                />
+                                {/* -------------------------------- */}
 
-                                {/* Dropdown Content */}
-                                <AnimatePresence>
-                                    {isProfileOpen && (
-                                        <motion.div
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, y: 10 }}
-                                            className="absolute right-0 mt-3 w-48 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden py-1"
-                                        >
-                                            <Link
-                                                href="/profile"
-                                                className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-rakit-50 hover:text-rakit-600 transition"
-                                            >
-                                                <User size={16} />
-                                                Profile
-                                            </Link>
+                                <div className="relative">
+                                    <button
+                                        onClick={() =>
+                                            toggleDropdown("profile")
+                                        }
+                                        className="flex items-center gap-2 text-sm font-semibold text-rakit-800 hover:text-rakit-600 transition focus:outline-none pl-2 border-l border-gray-300 ml-1"
+                                    >
+                                        <span>Hello, {user.name}</span>
+                                        <ChevronDown
+                                            size={16}
+                                            className={`transition-transform duration-200 ${
+                                                activeDropdown === "profile"
+                                                    ? "rotate-180"
+                                                    : ""
+                                            }`}
+                                        />
+                                    </button>
 
-                                            {/* Tombol Logout harus method="post" di Laravel */}
-                                            <Link
-                                                href="/logout"
-                                                method="post"
-                                                as="button"
-                                                className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition text-left"
+                                    {/* Dropdown Profile */}
+                                    <AnimatePresence>
+                                        {activeDropdown === "profile" && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: 10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: 10 }}
+                                                className="absolute right-0 mt-3 w-48 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden py-1 z-50"
                                             >
-                                                <LogOut size={16} />
-                                                Logout
-                                            </Link>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
-                            </div>
+                                                <Link
+                                                    href="/profile"
+                                                    className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-rakit-50 hover:text-rakit-600 transition"
+                                                >
+                                                    <User size={16} />
+                                                    Profile
+                                                </Link>
+
+                                                <Link
+                                                    href="/logout"
+                                                    method="post"
+                                                    as="button"
+                                                    className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition text-left"
+                                                >
+                                                    <LogOut size={16} />
+                                                    Logout
+                                                </Link>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+                            </>
                         ) : (
                             <>
                                 <Link
@@ -118,16 +152,27 @@ export default function Header() {
                     </div>
 
                     {/* Mobile Menu Button */}
-                    <button
-                        className="md:hidden p-2 text-rakit-800"
-                        onClick={() => setIsOpen(!isOpen)}
-                    >
-                        {isOpen ? <X size={24} /> : <Menu size={24} />}
-                    </button>
+                    <div className="md:hidden flex items-center gap-3">
+                        {user && (
+                            <Link
+                                href="/notifications"
+                                className="relative p-2 text-rakit-800"
+                            >
+                                <Bell size={22} />
+                                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                            </Link>
+                        )}
+
+                        <button
+                            className="p-2 text-rakit-800"
+                            onClick={() => setIsOpen(!isOpen)}
+                        >
+                            {isOpen ? <X size={24} /> : <Menu size={24} />}
+                        </button>
+                    </div>
                 </div>
             </motion.header>
 
-            {/* Mobile Navigation Dropdown */}
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
@@ -149,10 +194,8 @@ export default function Header() {
 
                             <hr className="border-rakit-300 my-4" />
 
-                            {/* Mobile Auth Buttons */}
                             <div className="flex flex-col gap-3">
                                 {user ? (
-                                    // Mobile View: Jika Login
                                     <div className="space-y-3">
                                         <div className="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-2">
                                             Account ({user.name})
