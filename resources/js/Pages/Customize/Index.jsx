@@ -209,9 +209,12 @@ export default function CustomizeIndex() {
                                 )}
                             </span>
                         </div>
-                        <button className="w-full py-4 bg-rakit-800 hover:bg-rakit-900 text-white font-bold rounded-xl shadow-lg shadow-rakit-800/20 transition-all active:scale-[0.98]">
-                            Pesan Sekarang
-                        </button>
+                        <Link
+                            href="/pengrajin"
+                            className="w-full py-4 bg-rakit-800 hover:bg-rakit-900 text-white font-bold rounded-xl shadow-lg shadow-rakit-800/20 transition-all active:scale-[0.98] flex items-center justify-center text-center"
+                        >
+                            Pilih Pengrajin
+                        </Link>
                     </div>
                 </div>
             </div>

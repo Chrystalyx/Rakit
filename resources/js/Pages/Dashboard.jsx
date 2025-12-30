@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Head, Link, usePage } from "@inertiajs/react";
+import toast, { Toaster } from "react-hot-toast";
 import GuestLayout from "../Layouts/GuestLayout";
+import CreateReviewModal from "@/Components/Modals/CreateReviewModal";
 import {
     Hammer,
     ShieldCheck,
@@ -30,8 +33,9 @@ const FaqItem = ({ question, answer }) => {
                 className="flex items-center justify-between w-full py-6 text-left focus:outline-none"
             >
                 <span
-                    className={`text-lg font-medium ${isOpen ? "text-rakit-500" : "text-rakit-800"
-                        } transition-colors`}
+                    className={`text-lg font-medium ${
+                        isOpen ? "text-rakit-500" : "text-rakit-800"
+                    } transition-colors`}
                 >
                     {question}
                 </span>
@@ -60,6 +64,37 @@ const FaqItem = ({ question, answer }) => {
 };
 
 export default function Dashboard({ reviews }) {
+    // --- State & Auth Logic ---
+    const { auth } = usePage().props;
+    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+
+    // Logic Data Testimonial
+    const testimonialData = reviews && reviews.length > 0 ? reviews : [];
+
+    // Duplicate data agar marquee berjalan mulus jika data sedikit
+    // Jika data ada (misal 1-4), kita duplikasi agar animasi loop tidak patah
+    const marqueeData =
+        testimonialData.length > 0 && testimonialData.length < 5
+            ? [...testimonialData, ...testimonialData, ...testimonialData]
+            : testimonialData.length > 0
+            ? [...testimonialData, ...testimonialData]
+            : [];
+
+    // Fungsi Handle Click Button Review
+    const handleAddReview = () => {
+        if (!auth.user) {
+            toast.error("Silakan login terlebih dahulu untuk menulis ulasan.", {
+                style: {
+                    borderRadius: "10px",
+                    background: "#333",
+                    color: "#fff",
+                },
+            });
+        } else {
+            setIsReviewModalOpen(true);
+        }
+    };
+
     // --- Variabel Animasi Hero ---
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -106,14 +141,10 @@ export default function Dashboard({ reviews }) {
         },
     };
 
-    const testimonialData = reviews && reviews.length > 0 ? reviews : [];
-
-    const marqueeData = testimonialData.length > 0
-        ? [...testimonialData, ...testimonialData]
-        : [];
-
     return (
         <GuestLayout>
+            <Toaster position="top-center" />
+
             {/* ================= HERO SECTION ================= */}
             <section className="relative overflow-hidden pt-24 pb-24 lg:pt-36 lg:pb-32 bg-gradient-to-b from-white to-rakit-50/50">
                 {/* Background Decoration */}
@@ -219,12 +250,11 @@ export default function Dashboard({ reviews }) {
                             </p>
 
                             <div className="flex items-center">
-                                {/* Link ke Website TACO */}
                                 <a
                                     href="https://taco.co.id/"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="transition-transform duration-300 hover:scale-110 inline-block" // Animasi ditaruh di sini
+                                    className="transition-transform duration-300 hover:scale-110 inline-block"
                                 >
                                     <img
                                         src="/images/taco_logo.svg"
@@ -238,7 +268,6 @@ export default function Dashboard({ reviews }) {
 
                     {/* RIGHT COLUMN: Layered Images & Floating Cards */}
                     <div className="relative h-[600px] w-full hidden lg:block">
-                        {/* Main Image (Tall) */}
                         <motion.div
                             initial={{ opacity: 0, x: 50 }}
                             animate={{ opacity: 1, x: 0 }}
@@ -253,14 +282,12 @@ export default function Dashboard({ reviews }) {
                             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
                         </motion.div>
 
-                        {/* Secondary Image (Small, overlapped) */}
                         <motion.div
                             initial={{ opacity: 0, y: 50 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.8, delay: 0.5 }}
                             className="absolute bottom-10 left-4 w-[45%] h-[40%] rounded-3xl overflow-hidden shadow-xl border-4 border-white z-20"
                         >
-                            {/* Placeholder: Gunakan gambar detail furnitur di sini */}
                             <img
                                 src="/images/SmallHeroimg.jpg"
                                 alt="Detail Furniture"
@@ -268,7 +295,6 @@ export default function Dashboard({ reviews }) {
                             />
                         </motion.div>
 
-                        {/* Floating Card 1: Verified Partner */}
                         <motion.div
                             variants={floatingAnimation}
                             animate="animate"
@@ -287,7 +313,6 @@ export default function Dashboard({ reviews }) {
                             </div>
                         </motion.div>
 
-                        {/* Floating Card 2: Satisfaction */}
                         <motion.div
                             animate={{
                                 y: [0, 15, 0],
@@ -316,7 +341,6 @@ export default function Dashboard({ reviews }) {
 
             {/* ================= STATS BAR ================= */}
             <section className="bg-rakit-800 py-16 text-white relative overflow-hidden">
-                {/* Background Pattern - Sedikit dibuat lebih redup */}
                 <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
                     <svg width="100%" height="100%">
                         <pattern
@@ -336,7 +360,6 @@ export default function Dashboard({ reviews }) {
                     </svg>
                 </div>
 
-                {/* Container */}
                 <div className="max-w-7xl mx-auto px-6 relative z-10">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-y-12 gap-x-8">
                         {[
@@ -373,26 +396,21 @@ export default function Dashboard({ reviews }) {
                                 viewport={{ once: true }}
                                 className="relative group text-center md:text-left flex flex-col md:items-center"
                             >
-                                {/* Vertical Divider (Hanya muncul di Desktop & bukan di elemen terakhir) */}
                                 {idx !== 3 && (
                                     <div className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 w-[1px] h-12 bg-white/10 -mr-4"></div>
                                 )}
-
-                                {/* Icon Wrapper with Glow Effect */}
                                 <div
-                                    className={`mx-auto md:mx-0 w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mb-4 ${stat.color
-                                        } group-hover:scale-110 group-hover:bg-white/10 transition-all duration-300 ring-1 ring-white/10 group-hover:ring-${stat.color.split("-")[1]
-                                        }-500/50`}
+                                    className={`mx-auto md:mx-0 w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mb-4 ${
+                                        stat.color
+                                    } group-hover:scale-110 group-hover:bg-white/10 transition-all duration-300 ring-1 ring-white/10 group-hover:ring-${
+                                        stat.color.split("-")[1]
+                                    }-500/50`}
                                 >
                                     {stat.icon}
                                 </div>
-
-                                {/* Value Number */}
                                 <h4 className="text-3xl md:text-4xl font-bold text-white mb-1 tracking-tight">
                                     {stat.value}
                                 </h4>
-
-                                {/* Label */}
                                 <p className="text-rakit-200 text-sm font-medium uppercase tracking-wider">
                                     {stat.label}
                                 </p>
@@ -404,7 +422,6 @@ export default function Dashboard({ reviews }) {
 
             {/* ================= VALUE PROPOSITION ================= */}
             <section className="py-24 max-w-7xl mx-auto px-6 relative">
-                {/* Header Section */}
                 <div className="text-center mb-16 max-w-2xl mx-auto">
                     <span className="text-rakit-500 font-bold tracking-wider uppercase text-xs">
                         Kenapa Rakit?
@@ -418,7 +435,6 @@ export default function Dashboard({ reviews }) {
                     </p>
                 </div>
 
-                {/* Cards Container */}
                 <motion.div
                     variants={staggerContainer}
                     initial="hidden"
@@ -446,20 +462,15 @@ export default function Dashboard({ reviews }) {
                         <motion.div
                             key={i}
                             variants={fadeInUp}
-                            whileHover={{ y: -10 }} // Efek naik sedikit saat hover
+                            whileHover={{ y: -10 }}
                             className="group p-8 rounded-3xl bg-white border border-rakit-200 hover:border-rakit-400 hover:shadow-2xl hover:shadow-rakit-200/50 transition-all duration-300 relative overflow-hidden"
                         >
-                            {/* Decorative Background Number (01, 02, 03) */}
                             <div className="absolute -right-4 -top-4 text-9xl font-black text-rakit-50 opacity-0 group-hover:opacity-100 transition-opacity duration-500 select-none z-0">
                                 0{i + 1}
                             </div>
-
-                            {/* Subtle Gradient Overlay on Hover */}
                             <div className="absolute inset-0 bg-gradient-to-br from-transparent to-rakit-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0"></div>
 
-                            {/* Content Wrapper */}
                             <div className="relative z-10">
-                                {/* Icon with Wiggle Animation */}
                                 <div className="w-16 h-16 rounded-2xl bg-rakit-50 text-rakit-600 flex items-center justify-center mb-6 group-hover:bg-rakit-800 group-hover:text-white transition-colors duration-300 shadow-sm group-hover:shadow-md">
                                     <motion.div
                                         whileHover={{
@@ -470,11 +481,9 @@ export default function Dashboard({ reviews }) {
                                         {item.icon}
                                     </motion.div>
                                 </div>
-
                                 <h3 className="text-xl font-bold text-rakit-800 mb-3 group-hover:translate-x-1 transition-transform duration-300">
                                     {item.title}
                                 </h3>
-
                                 <p className="text-gray-600 leading-relaxed text-sm group-hover:text-gray-700">
                                     {item.desc}
                                 </p>
@@ -505,7 +514,6 @@ export default function Dashboard({ reviews }) {
                         }}
                         className="grid md:grid-cols-4 gap-8 relative"
                     >
-                        {/* 1. Connecting Dashed Line (Blueprint Style) - Desktop Only */}
                         <div className="hidden md:block absolute top-12 left-[10%] w-[80%] h-0.5 border-t-2 border-dashed border-rakit-300 -z-10"></div>
 
                         {[
@@ -546,7 +554,6 @@ export default function Dashboard({ reviews }) {
                                 }}
                                 className="relative group"
                             >
-                                {/* Arrow Indicator between steps (Desktop Only) */}
                                 {i !== 3 && (
                                     <div className="hidden md:block absolute -right-6 top-1/2 -translate-y-1/2 text-rakit-200 z-0">
                                         <ChevronRight size={24} />
@@ -554,19 +561,16 @@ export default function Dashboard({ reviews }) {
                                 )}
 
                                 <div className="bg-rakit-50 p-6 rounded-3xl border border-rakit-200 text-center relative hover:-translate-y-2 hover:shadow-lg hover:border-rakit-400 transition-all duration-300 h-full z-10">
-                                    {/* Step Number Bubble */}
                                     <div className="w-12 h-12 mx-auto bg-rakit-800 text-white rounded-full flex items-center justify-center font-bold text-sm mb-6 border-[4px] border-white shadow-md absolute -top-6 left-1/2 -translate-x-1/2 group-hover:scale-110 transition-transform duration-300 ring-4 ring-rakit-50">
                                         {item.step}
                                     </div>
 
-                                    {/* Icon */}
                                     <div className="mt-8 mb-4 text-rakit-600 flex justify-center group-hover:text-rakit-800 transition-colors">
                                         <div className="p-3 bg-white rounded-xl shadow-sm group-hover:shadow-md transition-shadow">
                                             {item.icon}
                                         </div>
                                     </div>
 
-                                    {/* Content */}
                                     <h3 className="font-bold text-lg text-rakit-800 mb-2">
                                         {item.title}
                                     </h3>
@@ -582,13 +586,25 @@ export default function Dashboard({ reviews }) {
 
             {/* ================= TESTIMONIALS (UPDATED) ================= */}
             <section className="py-24 bg-rakit-50 overflow-hidden relative">
-                <div className="max-w-7xl mx-auto px-6 mb-12 text-center">
+                <div className="max-w-7xl mx-auto px-6 mb-12 text-center relative z-20">
                     <span className="text-rakit-500 font-bold tracking-wider uppercase text-xs">
                         Social Proof
                     </span>
-                    <h2 className="text-3xl font-bold text-rakit-800 mt-2">
+                    <h2 className="text-3xl font-bold text-rakit-800 mt-2 mb-6">
                         Kata Mereka Tentang RAKIT
                     </h2>
+
+                    {/* BUTTON TAMBAH REVIEW */}
+                    <button
+                        onClick={handleAddReview}
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-white text-rakit-800 font-bold rounded-full shadow-md hover:shadow-lg hover:bg-rakit-50 transition-all border border-rakit-100 group"
+                    >
+                        <Plus
+                            size={18}
+                            className="group-hover:rotate-90 transition-transform duration-300"
+                        />
+                        Tulis Pengalaman Anda
+                    </button>
                 </div>
 
                 {/* Gradient Mask */}
@@ -597,18 +613,25 @@ export default function Dashboard({ reviews }) {
 
                 {/* Kondisi jika belum ada review */}
                 {testimonialData.length === 0 ? (
-                    <div className="text-center text-gray-500 py-10">
-                        <p>Belum ada ulasan saat ini. Jadilah yang pertama!</p>
+                    <div className="text-center text-gray-500 py-10 relative z-10">
+                        <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm text-rakit-300">
+                            <Quote size={32} />
+                        </div>
+                        <p>Belum ada ulasan saat ini.</p>
+                        <p className="text-sm">
+                            Jadilah yang pertama membagikan cerita Anda!
+                        </p>
                     </div>
                 ) : (
                     /* Moving Container */
-                    <div className="flex">
+                    <div className="flex mt-8">
                         <motion.div
                             className="flex gap-6 px-6"
                             animate={{ x: ["0%", "-50%"] }}
                             transition={{
                                 ease: "linear",
-                                duration: 40,
+                                // Durasi dinamis: semakin banyak review, semakin lama (agar kecepatan tetap wajar)
+                                duration: marqueeData.length * 5,
                                 repeat: Infinity,
                             }}
                         >
@@ -619,7 +642,11 @@ export default function Dashboard({ reviews }) {
                                 >
                                     {/* Quote Icon */}
                                     <div className="absolute top-6 right-8 text-rakit-100 group-hover:text-rakit-200 transition-colors">
-                                        <Quote size={48} fill="currentColor" className="opacity-50" />
+                                        <Quote
+                                            size={48}
+                                            fill="currentColor"
+                                            className="opacity-50"
+                                        />
                                     </div>
 
                                     {/* Rating Stars Dinamis */}
@@ -628,8 +655,16 @@ export default function Dashboard({ reviews }) {
                                             <Star
                                                 key={idx}
                                                 size={16}
-                                                fill={idx < testi.rating ? "currentColor" : "none"} // Fill bintang sesuai rating
-                                                className={idx < testi.rating ? "text-yellow-400" : "text-gray-300"}
+                                                fill={
+                                                    idx < testi.rating
+                                                        ? "currentColor"
+                                                        : "none"
+                                                }
+                                                className={
+                                                    idx < testi.rating
+                                                        ? "text-yellow-400"
+                                                        : "text-gray-300"
+                                                }
                                             />
                                         ))}
                                     </div>
@@ -641,7 +676,7 @@ export default function Dashboard({ reviews }) {
 
                                     {/* User Info */}
                                     <div className="flex items-center gap-4 border-t border-gray-100 pt-6">
-                                        <div className="w-10 h-10 rounded-full bg-rakit-800 text-white flex items-center justify-center font-bold">
+                                        <div className="w-10 h-10 rounded-full bg-rakit-800 text-white flex items-center justify-center font-bold uppercase">
                                             {testi.avatar_initial}
                                         </div>
                                         <div>
@@ -662,7 +697,6 @@ export default function Dashboard({ reviews }) {
 
             {/* ================= FAQ SECTION ================= */}
             <section className="bg-white py-24 border-y border-rakit-300 relative overflow-hidden">
-                {/* Background Decoration */}
                 <div className="absolute -left-20 top-20 text-rakit-50 pointer-events-none select-none">
                     <svg
                         width="400"
@@ -676,7 +710,6 @@ export default function Dashboard({ reviews }) {
 
                 <div className="max-w-7xl mx-auto px-6 relative z-10">
                     <div className="grid md:grid-cols-12 gap-12 lg:gap-24">
-                        {/* Kolom Kiri: Judul & CTA */}
                         <div className="md:col-span-4 lg:col-span-4 space-y-8">
                             <div>
                                 <h2 className="text-3xl font-bold text-rakit-800 mb-4">
@@ -688,8 +721,6 @@ export default function Dashboard({ reviews }) {
                                     garansi kami.
                                 </p>
                             </div>
-
-                            {/* Kotak 'Masih Bingung' */}
                             <div className="p-6 bg-rakit-50 rounded-2xl border border-rakit-200">
                                 <h4 className="font-bold text-rakit-800 mb-2">
                                     Masih bingung?
@@ -708,7 +739,6 @@ export default function Dashboard({ reviews }) {
                             </div>
                         </div>
 
-                        {/* Kolom Kanan: Daftar FAQ */}
                         <div className="md:col-span-8 lg:col-span-8">
                             <div className="divide-y divide-rakit-200 border-y border-rakit-200">
                                 <FaqItem
@@ -742,10 +772,8 @@ export default function Dashboard({ reviews }) {
                     viewport={{ once: true }}
                     className="relative py-24 rounded-[3rem] overflow-hidden text-center bg-rakit-900 shadow-2xl shadow-rakit-900/50"
                 >
-                    {/* 1. Spotlight Gradient Background */}
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-rakit-700 via-rakit-900 to-rakit-950 z-0"></div>
 
-                    {/* 2. Animated Pattern Overlay */}
                     <motion.div
                         animate={{ backgroundPosition: ["0% 0%", "100% 100%"] }}
                         transition={{
@@ -761,7 +789,6 @@ export default function Dashboard({ reviews }) {
                         }}
                     ></motion.div>
 
-                    {/* 3. Content */}
                     <div className="relative z-10 max-w-3xl mx-auto px-6">
                         <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight">
                             Wujudkan Kabinet <br />
@@ -777,11 +804,10 @@ export default function Dashboard({ reviews }) {
                         </p>
 
                         <div className="flex flex-col sm:flex-row gap-5 justify-center items-center">
-                            {/* Tombol Primary: Ke Halaman Customize */}
                             <motion.a
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
-                                href="/customize" // Sesuaikan link ini
+                                href="/customize"
                                 className="group w-full sm:w-auto px-10 py-5 rounded-2xl bg-white text-rakit-900 font-bold hover:bg-rakit-50 transition-all shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] flex items-center justify-center gap-3"
                             >
                                 <PenTool
@@ -795,11 +821,10 @@ export default function Dashboard({ reviews }) {
                                 />
                             </motion.a>
 
-                            {/* Tombol Secondary: Ke Daftar Pengrajin */}
                             <motion.a
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
-                                href="/pengrajin" // Sesuaikan link ini
+                                href="/pengrajin"
                                 className="w-full sm:w-auto px-10 py-5 rounded-2xl border border-white/20 text-white font-bold hover:bg-white/10 transition flex items-center justify-center gap-3 backdrop-blur-sm"
                             >
                                 <Users size={20} />
@@ -814,6 +839,12 @@ export default function Dashboard({ reviews }) {
                     </div>
                 </motion.div>
             </section>
+
+            {/* --- MODAL KOMPONEN --- */}
+            <CreateReviewModal
+                isOpen={isReviewModalOpen}
+                onClose={() => setIsReviewModalOpen(false)}
+            />
         </GuestLayout>
     );
 }

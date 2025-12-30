@@ -41,6 +41,15 @@ Route::get('/transaction/{id}', function ($id) {
     ]);
 })->name('transactions.show');
 
+Route::get('/pengrajin', function () {
+    // Sesuai lokasi file: resources/js/Pages/Customer/ChooseCrafter.jsx
+    return Inertia::render('Customer/ChooseCrafter');
+})->name('crafter.index');
+
+Route::get('/checkout', function () {
+    return Inertia::render('Customer/Checkout');
+})->name('checkout.index');
+
 Route::get('/', [WelcomeController::class, 'index'])->name('home');
 
 Route::get('/dashboard', function () {
@@ -63,6 +72,10 @@ Route::get('/crafters', [PublicCrafterController::class, 'index'])->name('public
 Route::get('/crafter/{id}', [PublicCrafterController::class, 'show'])
     ->name('public.crafters.show')
     ->where('id', '[0-9]+');
+
+    Route::middleware(['auth'])->group(function () {
+    Route::post('/reviews', [WelcomeController::class, 'store'])->name('reviews.store');
+});
 
 
 Route::middleware('guest')->group(function () {
