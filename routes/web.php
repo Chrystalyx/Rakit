@@ -11,6 +11,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\WelcomeController;
+use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\Auth\SocialAuthController;
 
 use App\Http\Controllers\Admin\OrderController;
@@ -33,11 +34,9 @@ Route::get('/transactions', function () {
     return Inertia::render('Transaction/Index');
 })->name('transactions.index');
 
-// Route untuk Detail (Menangkap ID)
 Route::get('/transaction/{id}', function ($id) {
-    // Nanti $id ini dipakai buat query database
     return Inertia::render('Transaction/TransactionDetail', [
-        'id' => $id 
+        'id' => $id
     ]);
 })->name('transactions.show');
 
@@ -100,6 +99,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 });
 
 Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->name('customer.')->group(function () {
+    Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
+    Route::get('/transaction/{id}', [TransactionController::class, 'show'])->name('transactions.show');
+
     Route::get('/dashboard', function () {
         return Inertia::render('Dashboard');
     })->name('dashboard');
@@ -108,6 +110,12 @@ Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->na
 Route::middleware(['auth', 'verified', 'role:crafter'])->prefix('crafter')->name('crafter.')->group(function () {
     Route::get('/dashboard', [CrafterDashboardController::class, 'index'])->name('dashboard');
     Route::get('/project/{id}', [CrafterDashboardController::class, 'show'])->name('project.detail');
+
+    Route::get('/portfolio', [CrafterDashboardController::class, 'portfolio'])->name('portfolio');
+    Route::get('/projectlist', [CrafterDashboardController::class, 'projectList'])->name('projectlist');
+
+    Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
+    Route::get('/transaction/{id}', [TransactionController::class, 'show'])->name('transactions.show');
 });
 
 Route::middleware(['auth', 'verified', 'role:crafter, customer'])->prefix('crafter')->name('crafter.')->group(function () {

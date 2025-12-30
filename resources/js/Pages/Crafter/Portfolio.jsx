@@ -114,7 +114,7 @@ const ReviewsTab = ({ reviews }) => (
     </motion.div>
 );
 
-export default function CrafterDetail({ crafter }) {
+export default function Portfolio({ crafter }) {
     const [activeTab, setActiveTab] = useState("portfolio");
     const [selectedPortfolio, setSelectedPortfolio] = useState(null);
 

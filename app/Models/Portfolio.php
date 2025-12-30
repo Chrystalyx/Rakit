@@ -17,7 +17,14 @@ class Portfolio extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->hasOneThrough(
+            User::class,
+            CrafterProfile::class,
+            'id',
+            'id',
+            'crafter_profile_id',
+            'user_id'
+        );
     }
 
     public function crafterProfile()
