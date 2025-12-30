@@ -29,6 +29,18 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
+Route::get('/transactions', function () {
+    return Inertia::render('Transaction/Index');
+})->name('transactions.index');
+
+// Route untuk Detail (Menangkap ID)
+Route::get('/transaction/{id}', function ($id) {
+    // Nanti $id ini dipakai buat query database
+    return Inertia::render('Transaction/TransactionDetail', [
+        'id' => $id 
+    ]);
+})->name('transactions.show');
+
 Route::get('/', [WelcomeController::class, 'index'])->name('home');
 
 Route::get('/dashboard', function () {
