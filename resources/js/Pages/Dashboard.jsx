@@ -30,9 +30,8 @@ const FaqItem = ({ question, answer }) => {
                 className="flex items-center justify-between w-full py-6 text-left focus:outline-none"
             >
                 <span
-                    className={`text-lg font-medium ${
-                        isOpen ? "text-rakit-500" : "text-rakit-800"
-                    } transition-colors`}
+                    className={`text-lg font-medium ${isOpen ? "text-rakit-500" : "text-rakit-800"
+                        } transition-colors`}
                 >
                     {question}
                 </span>
@@ -60,7 +59,7 @@ const FaqItem = ({ question, answer }) => {
     );
 };
 
-export default function Dashboard() {
+export default function Dashboard({ reviews }) {
     // --- Variabel Animasi Hero ---
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -106,6 +105,12 @@ export default function Dashboard() {
             transition: { staggerChildren: 0.2 },
         },
     };
+
+    const testimonialData = reviews && reviews.length > 0 ? reviews : [];
+
+    const marqueeData = testimonialData.length > 0
+        ? [...testimonialData, ...testimonialData]
+        : [];
 
     return (
         <GuestLayout>
@@ -375,11 +380,9 @@ export default function Dashboard() {
 
                                 {/* Icon Wrapper with Glow Effect */}
                                 <div
-                                    className={`mx-auto md:mx-0 w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mb-4 ${
-                                        stat.color
-                                    } group-hover:scale-110 group-hover:bg-white/10 transition-all duration-300 ring-1 ring-white/10 group-hover:ring-${
-                                        stat.color.split("-")[1]
-                                    }-500/50`}
+                                    className={`mx-auto md:mx-0 w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mb-4 ${stat.color
+                                        } group-hover:scale-110 group-hover:bg-white/10 transition-all duration-300 ring-1 ring-white/10 group-hover:ring-${stat.color.split("-")[1]
+                                        }-500/50`}
                                 >
                                     {stat.icon}
                                 </div>
@@ -577,7 +580,7 @@ export default function Dashboard() {
                 </div>
             </section>
 
-            {/* ================= TESTIMONIALS ================= */}
+            {/* ================= TESTIMONIALS (UPDATED) ================= */}
             <section className="py-24 bg-rakit-50 overflow-hidden relative">
                 <div className="max-w-7xl mx-auto px-6 mb-12 text-center">
                     <span className="text-rakit-500 font-bold tracking-wider uppercase text-xs">
@@ -588,113 +591,73 @@ export default function Dashboard() {
                     </h2>
                 </div>
 
-                {/* Gradient Mask (Efek Fading di Kiri & Kanan) */}
+                {/* Gradient Mask */}
                 <div className="absolute top-0 left-0 w-32 h-full bg-gradient-to-r from-rakit-50 to-transparent z-10 pointer-events-none"></div>
                 <div className="absolute top-0 right-0 w-32 h-full bg-gradient-to-l from-rakit-50 to-transparent z-10 pointer-events-none"></div>
 
-                {/* Moving Container */}
-                <div className="flex">
-                    <motion.div
-                        className="flex gap-6 px-6"
-                        animate={{ x: ["0%", "-50%"] }} // Bergerak setengah panjang total (karena data diduplikasi)
-                        transition={{
-                            ease: "linear",
-                            duration: 40, // Atur kecepatan di sini (makin besar makin lambat)
-                            repeat: Infinity,
-                        }}
-                    >
-                        {/* Kita render data 2 kali (Double) supaya loop-nya nyambung tanpa putus */}
-                        {[
-                            ...[
-                                {
-                                    name: "Sarah Wijaya",
-                                    role: "Pemilik Rumah",
-                                    quote: "Awalnya ragu bikin kitchen set custom karena takut di-markup. Tapi di Rakit, RAB-nya detail banget. Puas!",
-                                },
-                                {
-                                    name: "Budi Santoso",
-                                    role: "Arsitek",
-                                    quote: "Platform ini sangat membantu saya mencari vendor kayu yang spesifikasinya jelas. Kualitas pengerjaan grade A.",
-                                },
-                                {
-                                    name: "Reza Rahardian",
-                                    role: "Interior Designer",
-                                    quote: "Sangat transparan. Saya bisa pantau progress tukang tanpa harus datang ke lokasi setiap hari. Hemat waktu!",
-                                },
-                                {
-                                    name: "Melani Putri",
-                                    role: "Ibu Rumah Tangga",
-                                    quote: "Lemari custom anak saya jadi tepat waktu. Finishing halusnya juara, tidak ada bagian tajam yang bahaya.",
-                                },
-                            ],
-                            ...[
-                                // DUPLIKASI DATA DI SINI
-                                {
-                                    name: "Sarah Wijaya",
-                                    role: "Pemilik Rumah",
-                                    quote: "Awalnya ragu bikin kitchen set custom karena takut di-markup. Tapi di Rakit, RAB-nya detail banget. Puas!",
-                                },
-                                {
-                                    name: "Budi Santoso",
-                                    role: "Arsitek",
-                                    quote: "Platform ini sangat membantu saya mencari vendor kayu yang spesifikasinya jelas. Kualitas pengerjaan grade A.",
-                                },
-                                {
-                                    name: "Reza Rahardian",
-                                    role: "Interior Designer",
-                                    quote: "Sangat transparan. Saya bisa pantau progress tukang tanpa harus datang ke lokasi setiap hari. Hemat waktu!",
-                                },
-                                {
-                                    name: "Melani Putri",
-                                    role: "Ibu Rumah Tangga",
-                                    quote: "Lemari custom anak saya jadi tepat waktu. Finishing halusnya juara, tidak ada bagian tajam yang bahaya.",
-                                },
-                            ],
-                        ].map((testi, i) => (
-                            <div
-                                key={i}
-                                className="flex-shrink-0 w-[400px] bg-white p-8 rounded-3xl border border-rakit-200 shadow-sm relative group hover:border-rakit-400 transition-colors"
-                            >
-                                {/* Decorative Quote Icon */}
-                                <div className="absolute top-6 right-8 text-rakit-100 group-hover:text-rakit-200 transition-colors">
-                                    <Quote
-                                        size={48}
-                                        fill="currentColor"
-                                        className="opacity-50"
-                                    />
-                                </div>
-
-                                <div className="flex gap-1 text-yellow-400 mb-6 relative z-10">
-                                    {[1, 2, 3, 4, 5].map((s) => (
-                                        <Star
-                                            key={s}
-                                            size={16}
-                                            fill="currentColor"
-                                        />
-                                    ))}
-                                </div>
-
-                                <p className="text-gray-700 italic mb-8 leading-relaxed relative z-10 h-24 line-clamp-3">
-                                    "{testi.quote}"
-                                </p>
-
-                                <div className="flex items-center gap-4 border-t border-gray-100 pt-6">
-                                    <div className="w-10 h-10 rounded-full bg-rakit-800 text-white flex items-center justify-center font-bold">
-                                        {testi.name.charAt(0)}
+                {/* Kondisi jika belum ada review */}
+                {testimonialData.length === 0 ? (
+                    <div className="text-center text-gray-500 py-10">
+                        <p>Belum ada ulasan saat ini. Jadilah yang pertama!</p>
+                    </div>
+                ) : (
+                    /* Moving Container */
+                    <div className="flex">
+                        <motion.div
+                            className="flex gap-6 px-6"
+                            animate={{ x: ["0%", "-50%"] }}
+                            transition={{
+                                ease: "linear",
+                                duration: 40,
+                                repeat: Infinity,
+                            }}
+                        >
+                            {marqueeData.map((testi, i) => (
+                                <div
+                                    key={`${testi.id}-${i}`}
+                                    className="flex-shrink-0 w-[400px] bg-white p-8 rounded-3xl border border-rakit-200 shadow-sm relative group hover:border-rakit-400 transition-colors"
+                                >
+                                    {/* Quote Icon */}
+                                    <div className="absolute top-6 right-8 text-rakit-100 group-hover:text-rakit-200 transition-colors">
+                                        <Quote size={48} fill="currentColor" className="opacity-50" />
                                     </div>
-                                    <div>
-                                        <h5 className="font-bold text-rakit-800">
-                                            {testi.name}
-                                        </h5>
-                                        <span className="text-xs text-gray-500">
-                                            {testi.role}
-                                        </span>
+
+                                    {/* Rating Stars Dinamis */}
+                                    <div className="flex gap-1 text-yellow-400 mb-6 relative z-10">
+                                        {[...Array(5)].map((_, idx) => (
+                                            <Star
+                                                key={idx}
+                                                size={16}
+                                                fill={idx < testi.rating ? "currentColor" : "none"} // Fill bintang sesuai rating
+                                                className={idx < testi.rating ? "text-yellow-400" : "text-gray-300"}
+                                            />
+                                        ))}
+                                    </div>
+
+                                    {/* Comment Text */}
+                                    <p className="text-gray-700 italic mb-8 leading-relaxed relative z-10 h-24 line-clamp-3">
+                                        "{testi.comment}"
+                                    </p>
+
+                                    {/* User Info */}
+                                    <div className="flex items-center gap-4 border-t border-gray-100 pt-6">
+                                        <div className="w-10 h-10 rounded-full bg-rakit-800 text-white flex items-center justify-center font-bold">
+                                            {testi.avatar_initial}
+                                        </div>
+                                        <div>
+                                            <h5 className="font-bold text-rakit-800">
+                                                {testi.name}
+                                            </h5>
+                                            <span className="text-xs text-gray-500">
+                                                {testi.role}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
-                    </motion.div>
-                </div>
+                            ))}
+                        </motion.div>
+                    </div>
+                )}
             </section>
 
             {/* ================= FAQ SECTION ================= */}

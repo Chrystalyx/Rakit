@@ -1,168 +1,144 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { Bell, Check, Trash2, ExternalLink } from "lucide-react";
+import { Link, router } from "@inertiajs/react";
+import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, Check, Clock, BellOff } from "lucide-react";
 
 export default function NotificationDropdown({ isOpen, onToggle }) {
-    // Data Dummy
-    const notifications = [
-        {
-            id: 1,
-            title: "Pesanan Dikonfirmasi",
-            message: "Pesanan lemari custom #ORD-001 telah diterima pengrajin.",
-            time: "Baru saja",
-            unread: true,
-            type: "order",
-        },
-        {
-            id: 2,
-            title: "Menunggu Pembayaran",
-            message: "Selesaikan pembayaran untuk pesanan Kitchen Set Anda.",
-            time: "1 jam lalu",
-            unread: true,
-            type: "payment",
-        },
-        {
-            id: 3,
-            title: "Promo Spesial",
-            message: "Diskon 10% untuk pembuatan meja kerja minimalis.",
-            time: "1 hari lalu",
-            unread: false,
-            type: "promo",
-        },
-    ];
+    const [notifications, setNotifications] = useState([]);
+    const [unreadCount, setUnreadCount] = useState(0);
+    const [loading, setLoading] = useState(false);
+    const dropdownRef = useRef(null);
 
-    const unreadCount = notifications.filter((n) => n.unread).length;
-    const hasNotification = unreadCount > 0;
+    useEffect(() => {
+        if (isOpen) {
+            fetchNotifications();
+        }
+    }, [isOpen]);
+
+    const fetchNotifications = async () => {
+        setLoading(true);
+        try {
+            const res = await axios.get("/notifications");
+            setNotifications(res.data.notifications);
+            setUnreadCount(res.data.unread_count);
+        } catch (error) {
+            console.error("Gagal mengambil notifikasi", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const markAsRead = async (id, url) => {
+        try {
+            await axios.post(`/notifications/${id}/read`);
+            setNotifications((prev) =>
+                prev.map((n) => (n.id === id ? { ...n, read_at: new Date() } : n))
+            );
+            setUnreadCount((prev) => Math.max(0, prev - 1));
+
+            if (url && url !== "#") {
+                router.visit(url);
+            }
+        } catch (error) {
+            console.error("Error marking read", error);
+        }
+    };
+
+    const markAllRead = async () => {
+        try {
+            await axios.post("/notifications/read-all");
+            setNotifications((prev) =>
+                prev.map((n) => ({ ...n, read_at: new Date() }))
+            );
+            setUnreadCount(0);
+        } catch (error) {
+            console.error("Error marking all read", error);
+        }
+    };
+
+    const getIcon = (type) => {
+        switch (type) {
+            case "new_order": return "🎉";
+            case "payment_success": return "💰";
+            case "progress_updated": return "🔨";
+            case "chat": return "💬";
+            case "rejected": return "❌";
+            case "verified": return "✅";
+            default: return "📢";
+        }
+    };
 
     return (
-        <div className="relative z-50">
-            {/* --- BUTTON LONCENG --- */}
-            <button
-                className={`relative p-2 rounded-full transition-all duration-200 group ${
-                    isOpen
-                        ? "bg-rakit-100 text-rakit-900"
-                        : "text-rakit-800 hover:bg-rakit-50"
-                }`}
-                onClick={onToggle}
-            >
-                {/* ICON: Tetap warna gelap (text-rakit-800) */}
-                <Bell
-                    size={20}
-                    className={`transition-transform group-hover:scale-105 ${
-                        hasNotification
-                            ? "fill-current text-rakit-800"
-                            : "text-rakit-800"
-                    }`}
-                />
-
-                {/* BADGE: Warna HIJAU */}
-                {hasNotification && (
-                    <span className="absolute top-1.5 right-2 flex h-2.5 w-2.5">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500 border-2 border-white"></span>
-                    </span>
-                )}
-            </button>
-
-            {/* --- DROPDOWN CONTENT --- */}
+        <div className="relative" ref={dropdownRef}>
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
-                        initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 8, scale: 0.98 }}
-                        transition={{ duration: 0.2, ease: "easeOut" }}
-                        className="absolute right-0 mt-3 w-80 sm:w-[400px] bg-white rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] border border-gray-100 overflow-hidden origin-top-right ring-1 ring-black/5"
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute right-0 mt-3 w-80 md:w-96 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50 origin-top-right"
                     >
                         {/* Header */}
-                        <div className="px-5 py-4 border-b border-gray-50 flex justify-between items-center bg-white sticky top-0 z-10">
-                            <h3 className="font-bold text-gray-900 text-[15px]">
-                                Notifikasi
-                            </h3>
-                            {hasNotification && (
-                                <button className="text-xs font-semibold text-black hover:text-rakit-900 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-green-100 transition-colors">
-                                    <Check size={14} /> Tandai dibaca
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-gray-50/50">
+                            <h3 className="font-bold text-gray-800 text-sm">Notifikasi</h3>
+                            {unreadCount > 0 && (
+                                <button
+                                    onClick={markAllRead}
+                                    className="text-xs text-rakit-600 hover:text-rakit-800 font-medium flex items-center gap-1 transition-colors"
+                                >
+                                    <Check size={14} /> Tandai semua dibaca
                                 </button>
                             )}
                         </div>
 
-                        {/* List Item */}
-                        <div className="max-h-[400px] overflow-y-auto custom-scrollbar bg-white">
-                            {notifications.length > 0 ? (
-                                <div>
-                                    {notifications.map((notif) => (
-                                        <div
-                                            key={notif.id}
-                                            className={`px-5 py-4 border-b border-gray-50 hover:bg-gray-50 transition-colors cursor-pointer flex gap-4 relative group ${
-                                                // REVISI: Background putih bersih (agar tidak terlalu banyak hijau)
-                                                // Hanya bold text untuk membedakan
-                                                notif.unread
-                                                    ? "bg-white"
-                                                    : "bg-white opacity-60"
-                                            }`}
-                                        >
-                                            {/* Indikator Garis Kiri (HIJAU untuk unread) */}
-                                            {notif.unread && (
-                                                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-green-500 rounded-r-full"></div>
-                                            )}
-
-                                            {/* Bullet Status (HIJAU untuk unread) */}
-                                            <div className="mt-1.5 shrink-0 relative">
-                                                {notif.unread ? (
-                                                    <div className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-sm shadow-green-500/30 ring-2 ring-white"></div>
-                                                ) : (
-                                                    // Kalau sudah dibaca, abu-abu pudar
-                                                    <div className="w-2 h-2 rounded-full bg-gray-200 mt-0.5 ml-0.5"></div>
-                                                )}
-                                            </div>
-
-                                            <div className="flex-1 space-y-1">
-                                                <div className="flex justify-between items-start gap-4">
-                                                    <h4
-                                                        className={`text-[14px] leading-snug ${
-                                                            notif.unread
-                                                                ? "font-bold text-gray-900"
-                                                                : "font-medium text-gray-600"
-                                                        }`}
-                                                    >
-                                                        {notif.title}
-                                                    </h4>
-                                                    <span className="text-[11px] text-gray-400 flex items-center gap-1 shrink-0 pt-0.5 font-medium">
-                                                        <Clock
-                                                            size={11}
-                                                            className="text-gray-300"
-                                                        />{" "}
-                                                        {notif.time}
-                                                    </span>
-                                                </div>
-                                                <p
-                                                    className={`text-[13px] leading-relaxed line-clamp-2 ${
-                                                        notif.unread
-                                                            ? "text-gray-600"
-                                                            : "text-gray-400"
-                                                    }`}
-                                                >
-                                                    {notif.message}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    ))}
+                        {/* List */}
+                        <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
+                            {loading ? (
+                                <div className="p-4 text-center text-gray-400 text-sm">Memuat...</div>
+                            ) : notifications.length === 0 ? (
+                                <div className="p-8 text-center flex flex-col items-center text-gray-400">
+                                    <Bell size={32} className="mb-2 opacity-20" />
+                                    <span className="text-sm">Belum ada notifikasi</span>
                                 </div>
                             ) : (
-                                // Empty State (Dipercantik)
-                                <div className="px-8 py-16 flex flex-col items-center justify-center text-center">
-                                    <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 text-gray-300">
-                                        <BellOff size={28} strokeWidth={1.5} />
+                                notifications.map((notif) => (
+                                    <div
+                                        key={notif.id}
+                                        onClick={() => markAsRead(notif.id, notif.url)}
+                                        className={`p-4 border-b border-gray-50 cursor-pointer transition-colors hover:bg-gray-50 flex gap-3 ${!notif.read_at ? "bg-blue-50/30" : "bg-white"
+                                            }`}
+                                    >
+                                        <div className="text-2xl">{getIcon(notif.type)}</div>
+                                        <div className="flex-1">
+                                            <div className="flex justify-between items-start mb-1">
+                                                <h4 className={`text-sm ${!notif.read_at ? "font-bold text-gray-900" : "font-medium text-gray-700"}`}>
+                                                    {notif.title}
+                                                </h4>
+                                                <span className="text-[10px] text-gray-400 whitespace-nowrap ml-2">
+                                                    {notif.created_at}
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-gray-500 leading-relaxed line-clamp-2">
+                                                {notif.message}
+                                            </p>
+                                        </div>
+                                        {!notif.read_at && (
+                                            <div className="self-center">
+                                                <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                                            </div>
+                                        )}
                                     </div>
-                                    <p className="text-gray-900 font-medium text-sm">
-                                        Tidak ada notifikasi
-                                    </p>
-                                    <p className="text-gray-400 text-xs mt-1">
-                                        Belum ada aktivitas terbaru untuk
-                                        ditampilkan.
-                                    </p>
-                                </div>
+                                ))
                             )}
+                        </div>
+
+                        {/* Footer */}
+                        <div className="p-2 border-t border-gray-100 bg-gray-50/50 text-center">
+                            <Link href="/notifications" className="text-xs text-rakit-600 hover:text-rakit-800 font-medium block w-full py-1">
+                                Lihat Semua
+                            </Link>
                         </div>
                     </motion.div>
                 )}

@@ -7,6 +7,10 @@ use Illuminate\Foundation\Application;
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\Auth\SocialAuthController;
 
 use App\Http\Controllers\Admin\OrderController;
@@ -25,12 +29,14 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
+Route::get('/', [WelcomeController::class, 'index'])->name('home');
+
 Route::get('/dashboard', function () {
     $user = Auth::user();
 
     if ($user->role === 'admin') return redirect()->route('admin.analytics.index');
     if ($user->role === 'crafter') return redirect()->route('crafter.dashboard');
-    if ($user->role === 'customer') return redirect()->route('customer.dashboard');
+    if ($user->role === 'customer') return redirect()->route('dashboard');
 
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -42,7 +48,9 @@ Route::get('/Customize/Index', function () {
 })->name('customize.index');
 
 Route::get('/crafters', [PublicCrafterController::class, 'index'])->name('public.crafters.index');
-Route::get('/crafter/{id}', [PublicCrafterController::class, 'show'])->name('public.crafters.show');
+Route::get('/crafter/{id}', [PublicCrafterController::class, 'show'])
+    ->name('public.crafters.show')
+    ->where('id', '[0-9]+');
 
 
 Route::middleware('guest')->group(function () {
@@ -68,20 +76,35 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 
 Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->name('customer.')->group(function () {
     Route::get('/dashboard', function () {
-        return Inertia::render('Customer/Dashboard');
+        return Inertia::render('Dashboard');
     })->name('dashboard');
 });
 
 Route::middleware(['auth', 'verified', 'role:crafter'])->prefix('crafter')->name('crafter.')->group(function () {
     Route::get('/dashboard', [CrafterDashboardController::class, 'index'])->name('dashboard');
-
     Route::get('/project/{id}', [CrafterDashboardController::class, 'show'])->name('project.detail');
+});
+
+Route::middleware(['auth', 'verified', 'role:crafter, customer'])->prefix('crafter')->name('crafter.')->group(function () {
+    Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
+    Route::patch('/projects/{id}/accept', [ProjectController::class, 'accept'])->name('projects.accept');
+    Route::patch('/projects/{id}/reject', [ProjectController::class, 'reject'])->name('projects.reject');
+    Route::post('/projects/{id}/progress', [ProjectController::class, 'updateProgress'])->name('projects.progress');
+});
+
+Route::middleware(['auth', 'verified', 'role:admin, customer'])->prefix('crafter')->name('crafter.')->group(function () {
+    Route::post('/projects/{id}/pay', [PaymentController::class, 'pay'])->name('payment.pay');
+    Route::post('/projects/{id}/confirm-payment', [PaymentController::class, 'confirm'])->middleware('role:admin')->name('payment.confirm');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
     Route::get('/chat/messages/{user}', [ChatController::class, 'getMessages'])->name('chat.getMessages');
     Route::post('/chat/messages/{user}', [ChatController::class, 'sendMessage'])->name('chat.sendMessage');
+
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.readAll');
 
     Route::get('/dashboard', function () {
         return Inertia::render('Dashboard');
