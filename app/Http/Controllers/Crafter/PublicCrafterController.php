@@ -94,7 +94,7 @@ class PublicCrafterController extends Controller
             'reviews' => [],
         ];
 
-        return Inertia::render('CrafterDetail', [
+        return Inertia::render('Customer/CrafterPortfolio', [
             'crafter' => $crafterData
         ]);
     }

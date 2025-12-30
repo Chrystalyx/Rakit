@@ -57,13 +57,11 @@ class User extends Authenticatable
         return $this->hasOne(CrafterProfile::class);
     }
 
-    // Pesan yang dikirim oleh user ini
     public function sentMessages()
     {
         return $this->hasMany(Message::class, 'sender_id');
     }
 
-    // Pesan yang diterima oleh user ini
     public function receivedMessages()
     {
         return $this->hasMany(Message::class, 'receiver_id');
@@ -71,6 +69,13 @@ class User extends Authenticatable
 
     public function portfolios()
     {
-        return $this->hasMany(Portfolio::class);
+        return $this->hasManyThrough(
+            Portfolio::class,
+            CrafterProfile::class,
+            'user_id',
+            'crafter_profile_id',
+            'id',
+            'id'
+        );
     }
 }

@@ -38,7 +38,7 @@ class AuthenticatedSessionController extends Controller
         }
 
         if ($user->role === 'crafter') {
-            return redirect()->intended(route('crafter.dashboard', absolute: false));
+            return redirect()->intended(route('crafter.portfolio', absolute: false));
         }
 
         if ($user->role === 'customer') {

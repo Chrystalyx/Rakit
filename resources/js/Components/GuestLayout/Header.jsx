@@ -22,10 +22,10 @@ export default function Header() {
 
         if (user.role === "crafter") {
             return [
-                { name: "Portofolio", href: "/crafter/dashboard" },
+                { name: "Portofolio", href: "/crafter/portfolio" },
                 { name: "Rakit Kabinet", href: "/Customize/Index" },
-                { name: "Project List", href: "#" },
-                { name: "History Transaksi", href: "#" },
+                { name: "Project List", href: "/crafter/projectlist" },
+                { name: "History Transaksi", href: "/transactions" },
             ];
         }
 
@@ -34,7 +34,7 @@ export default function Header() {
             { name: "Rakit Kabinet", href: "/Customize/Index" },
             { name: "Pengrajin", href: "/crafters" },
             { name: "Lihat Progress", href: "#" },
-            { name: "History Transaksi", href: "#" },
+            { name: "History Transaksi", href: "/transactions" },
         ];
     }, [user]);
 
