@@ -150,4 +150,91 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+Route::get('/track-order', function () {
+    return Inertia::render('Customer/TrackProgress');
+})->name('customer.track');
+
+Route::get('/my-orders', function () {
+    return Inertia::render('Customer/OrderList');
+})->name('customer.orders');
+
+// ROUTE KHUSUS UNTUK DETAIL PROYEK CRAFTER (DUMMY DATA)
+Route::get('/crafter/project/{id}', function ($id) {
+    
+    // Kita simulasi data berbeda sedikit berdasarkan ID agar terlihat dinamis
+    // Jika ID = 'AP-002', kita ubah judulnya, sisanya default.
+    
+    $projectTitle = 'Kitchen Set Minimalis - Apartemen Gateway';
+    $status = 'Produksi';
+    
+    if ($id == 'AP-002') {
+        $projectTitle = 'Lemari Wardrobe 4 Pintu (Full Cermin)';
+        $status = 'Finishing';
+    }
+
+    // Struktur Data yang SAMA PERSIS dengan kebutuhan ProjectDetail.jsx
+    $projectData = [
+        'id' => $id,
+        'title' => $projectTitle,
+        'status' => $status, // Produksi, Finishing, dll
+        'client' => 'Budi Santoso',
+        'client_id' => 'USER-123',
+        'client_avatar' => 'https://ui-avatars.com/api/?name=Budi+Santoso&background=random',
+        'address' => 'Apartemen Gateway, Tower A, Lt. 12, Bandung',
+        'deadline' => '15 Nov 2023',
+        
+        // Data Timeline Pengerjaan
+        'timeline' => [
+            [
+                'stage' => 'Pembayaran DP & Verifikasi', 
+                'status' => 'completed', 
+                'date' => '20 Oct 2023'
+            ],
+            [
+                'stage' => 'Pembelian Material', 
+                'status' => 'completed', 
+                'date' => '22 Oct 2023'
+            ],
+            [
+                'stage' => 'Produksi (Potong & Rakit)', 
+                'status' => $id == 'AP-002' ? 'completed' : 'current', // Simulasi beda status
+                'date' => 'Sedang Berjalan'
+            ],
+            [
+                'stage' => 'Finishing & Quality Control', 
+                'status' => $id == 'AP-002' ? 'current' : 'upcoming', 
+                'date' => 'Estimasi 10 Nov'
+            ],
+            [
+                'stage' => 'Pengiriman & Instalasi', 
+                'status' => 'upcoming', 
+                'date' => '15 Nov 2023'
+            ],
+        ],
+
+        // Data Spesifikasi Teknis (Dari Configurator)
+        'specs' => [
+            'materialName' => 'Multiplek Meranti 18mm',
+            'finishing' => 'HPL Taco TH-888 (Wood Grain)',
+            'width' => 240,
+            'height' => 80,
+            'depth' => 60,
+            'plinth' => 10,
+            'backPanel' => true,
+            'partitions' => 4,
+            'shelves' => 2,
+            'ledStrip' => true,
+            'doorType' => 'swing', // none, swing, sliding
+            'lock' => true
+        ],
+
+        // Nilai Jasa (RAB)
+        'fee' => 8500000 
+    ];
+
+    return Inertia::render('Crafter/ProjectDetail', [
+        'project' => $projectData
+    ]);
+})->name('crafter.project.detail');
+
 require __DIR__ . '/auth.php';
