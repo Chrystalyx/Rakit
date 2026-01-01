@@ -1,14 +1,24 @@
+import React, { useState, useEffect } from "react";
+import { Head, Link, useForm } from "@inertiajs/react";
+import GuestLayout from "@/Layouts/GuestLayout";
 import InputError from "@/Components/InputError";
 import InputLabel from "@/Components/InputLabel";
 import PrimaryButton from "@/Components/PrimaryButton";
 import TextInput from "@/Components/TextInput";
-import { Head, Link, useForm } from "@inertiajs/react";
-import { useState, useEffect } from "react";
-import RegisterImage from "../../../images/Register.jpg";
 import { Toaster, toast } from "react-hot-toast";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+    Eye,
+    EyeOff,
+    User,
+    Hammer,
+    ChevronLeft,
+    CheckCircle2,
+    ArrowRight,
+} from "lucide-react";
+import RegisterImage from "../../../images/Register.jpg";
 
 export default function Register() {
-    // State untuk mengontrol tampilan
     const [selectedRole, setSelectedRole] = useState(null);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -18,489 +28,448 @@ export default function Register() {
         name: "",
         email: "",
         phone: "",
-        ktp_number: "", // Khusus Crafter
-        address: "", // Khusus Crafter
+        ktp_number: "",
+        address: "",
         password: "",
         password_confirmation: "",
     });
 
-    // Update data role saat state berubah
     useEffect(() => {
-        if (selectedRole) {
-            setData("role", selectedRole);
-        }
+        if (selectedRole) setData("role", selectedRole);
     }, [selectedRole]);
 
     const submit = (e) => {
         e.preventDefault();
         post(route("register"), {
             onFinish: () => reset("password", "password_confirmation"),
-            // Logika Alert Khusus Crafter vs Customer
             onSuccess: () => {
                 if (selectedRole === "crafter") {
                     toast.success(
-                        "Terima kasih sudah mendaftar! Akun Anda sedang menunggu konfirmasi lebih lanjut dari Admin.",
-                        { duration: 6000 } // Durasi lebih lama agar sempat terbaca
+                        "Pendaftaran berhasil! Menunggu verifikasi admin.",
+                        { duration: 5000 }
                     );
                 } else {
-                    toast.success("Registrasi berhasil! Selamat datang.");
+                    toast.success("Akun berhasil dibuat! Selamat datang.");
                 }
             },
-            onError: (errors) => {
-                toast.error(
-                    "Registrasi gagal. Mohon periksa kembali data Anda."
-                );
-            },
+            onError: () =>
+                toast.error("Registrasi gagal. Periksa kembali data Anda."),
         });
     };
 
-    const handleRoleSelect = (role) => {
-        setSelectedRole(role);
-    };
+    // --- SUB-COMPONENTS ---
+    const RoleCard = ({ role, icon: Icon, title, desc, onClick }) => (
+        <div
+            onClick={onClick}
+            className="group relative cursor-pointer bg-white border-2 border-gray-100 p-8 rounded-2xl hover:border-rakit-800 hover:shadow-2xl hover:shadow-rakit-900/10 transition-all duration-300 flex flex-col items-center text-center h-full active:scale-95"
+        >
+            <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-6 group-hover:bg-rakit-800 group-hover:text-white transition-colors duration-300 text-gray-500 shadow-sm">
+                <Icon size={36} />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-rakit-800 transition-colors">
+                {title}
+            </h3>
+            <p className="text-sm text-gray-500 leading-relaxed mb-4">{desc}</p>
+
+            <div className="mt-auto opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0 text-rakit-800 font-bold text-xs uppercase tracking-wider flex items-center gap-2 bg-rakit-50 px-3 py-1 rounded-full">
+                Pilih <ArrowRight size={14} />
+            </div>
+
+            {/* Active Border Effect */}
+            <div className="absolute inset-0 border-2 border-transparent group-hover:border-rakit-800 rounded-2xl pointer-events-none transition-colors"></div>
+        </div>
+    );
 
     return (
-        <div className="flex min-h-screen w-full bg-white">
-            <Head title="Register" />
+        <GuestLayout hideFooter={true}>
+            <Head title="Daftar Akun Baru" />
+            <Toaster position="top-center" />
 
-            <Toaster position="top-center" reverseOrder={false} />
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 relative overflow-hidden px-4 sm:px-6 lg:px-8 py-12">
+                {/* Background Decor */}
+                <div
+                    className="absolute inset-0 opacity-[0.4]"
+                    style={{
+                        backgroundImage:
+                            "radial-gradient(#cbd5e1 1px, transparent 1px)",
+                        backgroundSize: "32px 32px",
+                    }}
+                ></div>
+                <div className="absolute bottom-0 -right-20 w-[30rem] h-[30rem] bg-rakit-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
 
-            <div className="hidden lg:flex w-1/2 max-h-screen bg-gray-50 items-center justify-center relative overflow-hidden p-6">
-                <img
-                    src={RegisterImage}
-                    alt="Abstract Design"
-                    className="object-cover w-full h-full rounded-3xl"
-                />
-            </div>
-
-            <div className="w-full lg:w-1/2 flex flex-col justify-center px-8 md:px-16 lg:px-24 py-12 overflow-y-auto max-h-screen">
-                <div className="mb-6">
-                    {selectedRole ? (
-                        <button
-                            onClick={() => setSelectedRole(null)}
-                            className="text-sm font-medium text-gray-600 hover:text-gray-900 flex items-center gap-2 transition-colors"
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="16"
-                                height="16"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            >
-                                <path d="m15 18-6-6 6-6" />
-                            </svg>
-                            Kembali ke pemilihan peran
-                        </button>
-                    ) : (
-                        <Link
-                            href={route("login")}
-                            className="text-sm font-medium text-gray-600 hover:text-gray-900 flex items-center gap-2"
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="16"
-                                height="16"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            >
-                                <path d="m15 18-6-6 6-6" />
-                            </svg>
-                            Kembali ke halaman login
-                        </Link>
-                    )}
-                </div>
-
-                {!selectedRole ? (
-                    <div className="animate-fade-in-up">
-                        <div className="mb-8">
-                            <h1 className="text-4xl font-bold text-gray-900 mb-2">
-                                Buat Akun
-                            </h1>
-                            <p className="text-gray-600">
-                                Pilih cara Anda ingin bergabung dengan kami hari
-                                ini.
-                            </p>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div
-                                onClick={() => handleRoleSelect("customer")}
-                                className="cursor-pointer group relative rounded-2xl border-2 border-gray-200 p-6 hover:border-black transition-all duration-300 hover:shadow-lg"
-                            >
-                                <div className="mb-4 h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-black group-hover:text-white transition-colors">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        className="h-6 w-6"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                        strokeWidth={2}
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                        />
-                                    </svg>
-                                </div>
-                                <h3 className="text-xl font-bold text-gray-900">
-                                    Customer
-                                </h3>
-                                <p className="text-sm text-gray-500 mt-2">
-                                    Saya ingin mengkostum dan membeli produk.
-                                </p>
-                            </div>
-
-                            <div
-                                onClick={() => handleRoleSelect("crafter")}
-                                className="cursor-pointer group relative rounded-2xl border-2 border-gray-200 p-6 hover:border-black transition-all duration-300 hover:shadow-lg"
-                            >
-                                <div className="mb-4 h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-black group-hover:text-white transition-colors">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        className="h-6 w-6"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                        strokeWidth={2}
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"
-                                        />
-                                    </svg>
-                                </div>
-                                <h3 className="text-xl font-bold text-gray-900">
-                                    Crafter
-                                </h3>
-                                <p className="text-sm text-gray-500 mt-2">
-                                    Saya ingin menjual karya dan layanan saya.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="mt-8 text-center">
-                            <p className="text-sm text-gray-600">
-                                Sudah punya akun?{" "}
-                                <Link
-                                    href={route("login")}
-                                    className="font-bold text-black underline hover:no-underline"
-                                >
-                                    Log in
-                                </Link>
+                <div className="w-full max-w-7xl bg-white rounded-[2rem] shadow-2xl overflow-hidden flex flex-col lg:flex-row min-h-[700px] relative z-10 border border-white/50">
+                    {/* LEFT: Visual Image */}
+                    <div className="hidden lg:block lg:w-5/12 relative overflow-hidden bg-gray-900">
+                        <img
+                            src={RegisterImage}
+                            alt="Register"
+                            className="absolute inset-0 w-full h-full object-cover opacity-80"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+                        <div className="absolute bottom-0 left-0 p-16 text-white max-w-lg">
+                            <div className="mb-6 w-12 h-1 bg-white rounded-full"></div>
+                            <h2 className="text-4xl font-bold mb-4 leading-tight">
+                                Mulai Perjalanan Kreatif Anda.
+                            </h2>
+                            <p className="text-gray-300 text-base leading-relaxed opacity-90">
+                                Bergabunglah dengan ekosistem RAKIT. Tempat di
+                                mana ide desain bertemu dengan tangan-tangan
+                                terampil.
                             </p>
                         </div>
                     </div>
-                ) : (
-                    <div className="animate-fade-in-up">
-                        <div className="mb-6">
-                            <h1 className="text-3xl font-bold text-gray-900 mb-1">
-                                Daftar sebagai{" "}
-                                <span className="capitalize text-indigo-600">
-                                    {selectedRole}
-                                </span>
-                            </h1>
-                            <p className="text-gray-500 text-sm">
-                                Silakan isi form detail Anda untuk melanjutkan.
-                            </p>
-                        </div>
 
-                        <form onSubmit={submit} className="space-y-4">
-                            <div>
-                                <InputLabel
-                                    htmlFor="name"
-                                    value="Full Name"
-                                    className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1"
-                                />
-                                <TextInput
-                                    id="name"
-                                    name="name"
-                                    value={data.name}
-                                    className="mt-1 block w-full rounded-full border-gray-400 focus:border-black focus:ring-black py-3 px-4"
-                                    autoComplete="name"
-                                    isFocused={true}
-                                    onChange={(e) =>
-                                        setData("name", e.target.value)
-                                    }
-                                    required
-                                />
-                                <InputError
-                                    message={errors.name}
-                                    className="mt-2"
-                                />
-                            </div>
+                    {/* RIGHT: Content */}
+                    <div className="w-full lg:w-7/12 p-8 md:p-12 lg:p-20 relative bg-white flex flex-col justify-center">
+                        <AnimatePresence mode="wait">
+                            {!selectedRole ? (
+                                <motion.div
+                                    key="role-selection"
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -20 }}
+                                    className="flex flex-col h-full justify-center"
+                                >
+                                    <div className="text-center mb-12">
+                                        <h1 className="text-4xl font-extrabold text-gray-900 mb-4 tracking-tight">
+                                            Buat Akun Baru
+                                        </h1>
+                                        <p className="text-gray-500 text-lg">
+                                            Bagaimana Anda ingin menggunakan
+                                            RAKIT?
+                                        </p>
+                                    </div>
 
-                            <div>
-                                <InputLabel
-                                    htmlFor="email"
-                                    value="Email"
-                                    className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1"
-                                />
-                                <TextInput
-                                    id="email"
-                                    type="email"
-                                    name="email"
-                                    value={data.email}
-                                    className="mt-1 block w-full rounded-full border-gray-400 focus:border-black focus:ring-black py-3 px-4"
-                                    autoComplete="username"
-                                    onChange={(e) =>
-                                        setData("email", e.target.value)
-                                    }
-                                    required
-                                />
-                                <InputError
-                                    message={errors.email}
-                                    className="mt-2"
-                                />
-                            </div>
-
-                            {selectedRole === "crafter" && (
-                                <>
-                                    <div>
-                                        <InputLabel
-                                            htmlFor="ktp_number"
-                                            value="KTP Number (NIK)"
-                                            className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1"
-                                        />
-                                        <TextInput
-                                            id="ktp_number"
-                                            name="ktp_number"
-                                            type="number"
-                                            value={data.ktp_number}
-                                            className="mt-1 block w-full rounded-full border-gray-400 focus:border-black focus:ring-black py-3 px-4"
-                                            onChange={(e) =>
-                                                setData(
-                                                    "ktp_number",
-                                                    e.target.value
-                                                )
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto w-full">
+                                        <RoleCard
+                                            role="customer"
+                                            icon={User}
+                                            title="Customer"
+                                            desc="Saya ingin memesan furnitur custom untuk hunian saya."
+                                            onClick={() =>
+                                                setSelectedRole("customer")
                                             }
-                                            required
                                         />
-                                        <InputError
-                                            message={errors.ktp_number}
-                                            className="mt-2"
+                                        <RoleCard
+                                            role="crafter"
+                                            icon={Hammer}
+                                            title="Crafter (Mitra)"
+                                            desc="Saya pengrajin yang ingin menawarkan jasa & produk."
+                                            onClick={() =>
+                                                setSelectedRole("crafter")
+                                            }
                                         />
                                     </div>
-                                </>
-                            )}
 
-                            <div>
-                                <InputLabel
-                                    htmlFor="phone"
-                                    value="No Handphone"
-                                    className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1"
-                                />
-                                <TextInput
-                                    id="phone"
-                                    name="phone"
-                                    type="tel"
-                                    value={data.phone}
-                                    className="mt-1 block w-full rounded-full border-gray-400 focus:border-black focus:ring-black py-3 px-4"
-                                    onChange={(e) =>
-                                        setData("phone", e.target.value)
-                                    }
-                                    required
-                                />
-                                <InputError
-                                    message={errors.phone}
-                                    className="mt-2"
-                                />
-                            </div>
-
-                            {selectedRole === "crafter" && (
-                                <div>
-                                    <InputLabel
-                                        htmlFor="address"
-                                        value="Full Address"
-                                        className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1"
-                                    />
-                                    <textarea
-                                        id="address"
-                                        name="address"
-                                        value={data.address}
-                                        className="mt-1 block w-full rounded-2xl border-gray-400 focus:border-black focus:ring-black py-3 px-4 shadow-sm"
-                                        rows="3"
-                                        onChange={(e) =>
-                                            setData("address", e.target.value)
-                                        }
-                                        required
-                                    ></textarea>
-                                    <InputError
-                                        message={errors.address}
-                                        className="mt-2"
-                                    />
-                                </div>
-                            )}
-
-                            <div className="relative">
-                                <InputLabel
-                                    htmlFor="password"
-                                    value="Password"
-                                    className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1"
-                                />
-                                <div className="relative">
-                                    <TextInput
-                                        id="password"
-                                        type={
-                                            showPassword ? "text" : "password"
-                                        }
-                                        name="password"
-                                        value={data.password}
-                                        className="mt-1 block w-full rounded-full border-gray-400 focus:border-black focus:ring-black py-3 px-4 pr-10"
-                                        autoComplete="new-password"
-                                        onChange={(e) =>
-                                            setData("password", e.target.value)
-                                        }
-                                        required
-                                    />
+                                    <p className="mt-16 text-center text-sm text-gray-500">
+                                        Sudah punya akun?{" "}
+                                        <Link
+                                            href={route("login")}
+                                            className="font-bold text-rakit-800 hover:text-black hover:underline transition-colors"
+                                        >
+                                            Masuk disini
+                                        </Link>
+                                    </p>
+                                </motion.div>
+                            ) : (
+                                <motion.div
+                                    key="form-input"
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -20 }}
+                                >
                                     <button
-                                        type="button"
-                                        onClick={() =>
-                                            setShowPassword(!showPassword)
-                                        }
-                                        className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-500 hover:text-gray-700 mt-1"
+                                        onClick={() => setSelectedRole(null)}
+                                        className="flex items-center text-sm font-bold text-gray-400 hover:text-rakit-800 mb-8 group transition-colors w-fit"
                                     >
-                                        {showPassword ? (
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                strokeWidth={1.5}
-                                                stroke="currentColor"
-                                                className="w-5 h-5"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"
-                                                />
-                                            </svg>
-                                        ) : (
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                strokeWidth={1.5}
-                                                stroke="currentColor"
-                                                className="w-5 h-5"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
-                                                />
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                                                />
-                                            </svg>
-                                        )}
+                                        <ChevronLeft
+                                            size={20}
+                                            className="mr-1 group-hover:-translate-x-1 transition-transform"
+                                        />{" "}
+                                        Kembali pilih peran
                                     </button>
-                                </div>
-                                <InputError
-                                    message={errors.password}
-                                    className="mt-2"
-                                />
-                            </div>
 
-                            <div className="relative">
-                                <InputLabel
-                                    htmlFor="password_confirmation"
-                                    value="Confirm Password"
-                                    className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1"
-                                />
-                                <div className="relative">
-                                    <TextInput
-                                        id="password_confirmation"
-                                        type={
-                                            showConfirmPassword
-                                                ? "text"
-                                                : "password"
-                                        }
-                                        name="password_confirmation"
-                                        value={data.password_confirmation}
-                                        className="mt-1 block w-full rounded-full border-gray-400 focus:border-black focus:ring-black py-3 px-4 pr-10"
-                                        autoComplete="new-password"
-                                        onChange={(e) =>
-                                            setData(
-                                                "password_confirmation",
-                                                e.target.value
-                                            )
-                                        }
-                                        required
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            setShowConfirmPassword(
-                                                !showConfirmPassword
-                                            )
-                                        }
-                                        className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-500 hover:text-gray-700 mt-1"
+                                    <div className="mb-10">
+                                        <h2 className="text-3xl font-extrabold text-gray-900 flex items-center gap-3">
+                                            Daftar sebagai{" "}
+                                            <span className="text-rakit-800 bg-rakit-50 px-4 py-1 rounded-xl border border-rakit-100 capitalize text-2xl">
+                                                {selectedRole}
+                                            </span>
+                                        </h2>
+                                        <p className="text-gray-500 mt-3 text-base">
+                                            Isi data diri Anda dengan lengkap
+                                            dan benar.
+                                        </p>
+                                    </div>
+
+                                    <form
+                                        onSubmit={submit}
+                                        className="space-y-6"
                                     >
-                                        {showConfirmPassword ? (
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                strokeWidth={1.5}
-                                                stroke="currentColor"
-                                                className="w-5 h-5"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div>
+                                                <InputLabel
+                                                    htmlFor="name"
+                                                    value="Nama Lengkap"
+                                                    className="mb-2 font-bold text-gray-700"
                                                 />
-                                            </svg>
-                                        ) : (
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                strokeWidth={1.5}
-                                                stroke="currentColor"
-                                                className="w-5 h-5"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
+                                                <TextInput
+                                                    id="name"
+                                                    value={data.name}
+                                                    className="w-full rounded-xl py-3 px-4 border-gray-300 focus:border-rakit-800 focus:ring-rakit-800 bg-gray-50 focus:bg-white transition-all"
+                                                    autoComplete="name"
+                                                    isFocused={true}
+                                                    onChange={(e) =>
+                                                        setData(
+                                                            "name",
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    required
+                                                    placeholder="Nama Anda"
                                                 />
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                                <InputError
+                                                    message={errors.name}
+                                                    className="mt-1"
                                                 />
-                                            </svg>
-                                        )}
-                                    </button>
-                                </div>
-                                <InputError
-                                    message={errors.password_confirmation}
-                                    className="mt-2"
-                                />
-                            </div>
+                                            </div>
+                                            <div>
+                                                <InputLabel
+                                                    htmlFor="phone"
+                                                    value="No. WhatsApp"
+                                                    className="mb-2 font-bold text-gray-700"
+                                                />
+                                                <TextInput
+                                                    id="phone"
+                                                    type="tel"
+                                                    value={data.phone}
+                                                    className="w-full rounded-xl py-3 px-4 border-gray-300 focus:border-rakit-800 focus:ring-rakit-800 bg-gray-50 focus:bg-white transition-all"
+                                                    onChange={(e) =>
+                                                        setData(
+                                                            "phone",
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    required
+                                                    placeholder="08xxx"
+                                                />
+                                                <InputError
+                                                    message={errors.phone}
+                                                    className="mt-1"
+                                                />
+                                            </div>
+                                        </div>
 
-                            <PrimaryButton
-                                className="w-full justify-center rounded-full bg-black py-4 text-white hover:bg-gray-800 mt-6"
-                                disabled={processing}
-                            >
-                                Create {selectedRole} Account
-                            </PrimaryButton>
-                        </form>
+                                        <div>
+                                            <InputLabel
+                                                htmlFor="email"
+                                                value="Alamat Email"
+                                                className="mb-2 font-bold text-gray-700"
+                                            />
+                                            <TextInput
+                                                id="email"
+                                                type="email"
+                                                value={data.email}
+                                                className="w-full rounded-xl py-3 px-4 border-gray-300 focus:border-rakit-800 focus:ring-rakit-800 bg-gray-50 focus:bg-white transition-all"
+                                                autoComplete="username"
+                                                onChange={(e) =>
+                                                    setData(
+                                                        "email",
+                                                        e.target.value
+                                                    )
+                                                }
+                                                required
+                                                placeholder="email@contoh.com"
+                                            />
+                                            <InputError
+                                                message={errors.email}
+                                                className="mt-1"
+                                            />
+                                        </div>
+
+                                        {selectedRole === "crafter" && (
+                                            <motion.div
+                                                initial={{
+                                                    opacity: 0,
+                                                    height: 0,
+                                                }}
+                                                animate={{
+                                                    opacity: 1,
+                                                    height: "auto",
+                                                }}
+                                                className="space-y-6 p-6 bg-blue-50 rounded-2xl border border-blue-100"
+                                            >
+                                                <div>
+                                                    <InputLabel
+                                                        htmlFor="ktp_number"
+                                                        value="NIK (Nomor KTP)"
+                                                        className="mb-2 font-bold text-blue-900"
+                                                    />
+                                                    <TextInput
+                                                        id="ktp_number"
+                                                        type="number"
+                                                        value={data.ktp_number}
+                                                        className="w-full rounded-xl border-blue-200 focus:border-blue-500 focus:ring-blue-500 bg-white"
+                                                        onChange={(e) =>
+                                                            setData(
+                                                                "ktp_number",
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                        required
+                                                        placeholder="16 digit NIK"
+                                                    />
+                                                    <InputError
+                                                        message={
+                                                            errors.ktp_number
+                                                        }
+                                                        className="mt-1"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <InputLabel
+                                                        htmlFor="address"
+                                                        value="Alamat Workshop / Domisili"
+                                                        className="mb-2 font-bold text-blue-900"
+                                                    />
+                                                    <textarea
+                                                        id="address"
+                                                        value={data.address}
+                                                        className="w-full rounded-xl border-blue-200 focus:border-blue-500 focus:ring-blue-500 bg-white p-3 text-sm"
+                                                        rows="3"
+                                                        onChange={(e) =>
+                                                            setData(
+                                                                "address",
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                        required
+                                                        placeholder="Alamat lengkap..."
+                                                    ></textarea>
+                                                    <InputError
+                                                        message={errors.address}
+                                                        className="mt-1"
+                                                    />
+                                                </div>
+                                            </motion.div>
+                                        )}
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div>
+                                                <InputLabel
+                                                    htmlFor="password"
+                                                    value="Password"
+                                                    className="mb-2 font-bold text-gray-700"
+                                                />
+                                                <div className="relative">
+                                                    <TextInput
+                                                        id="password"
+                                                        type={
+                                                            showPassword
+                                                                ? "text"
+                                                                : "password"
+                                                        }
+                                                        value={data.password}
+                                                        className="w-full rounded-xl py-3 px-4 pr-10 border-gray-300 focus:border-rakit-800 focus:ring-rakit-800 bg-gray-50 focus:bg-white transition-all [&::-ms-reveal]:hidden [&::-ms-clear]:hidden"
+                                                        autoComplete="new-password"
+                                                        onChange={(e) =>
+                                                            setData(
+                                                                "password",
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                        required
+                                                        placeholder="••••••••"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            setShowPassword(
+                                                                !showPassword
+                                                            )
+                                                        }
+                                                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                                                    >
+                                                        {showPassword ? (
+                                                            <EyeOff size={18} />
+                                                        ) : (
+                                                            <Eye size={18} />
+                                                        )}
+                                                    </button>
+                                                </div>
+                                                <InputError
+                                                    message={errors.password}
+                                                    className="mt-1"
+                                                />
+                                            </div>
+                                            <div>
+                                                <InputLabel
+                                                    htmlFor="password_confirmation"
+                                                    value="Konfirmasi Password"
+                                                    className="mb-2 font-bold text-gray-700"
+                                                />
+                                                <div className="relative">
+                                                    <TextInput
+                                                        id="password_confirmation"
+                                                        type={
+                                                            showConfirmPassword
+                                                                ? "text"
+                                                                : "password"
+                                                        }
+                                                        value={
+                                                            data.password_confirmation
+                                                        }
+                                                        className="w-full rounded-xl py-3 px-4 pr-10 border-gray-300 focus:border-rakit-800 focus:ring-rakit-800 bg-gray-50 focus:bg-white transition-all [&::-ms-reveal]:hidden [&::-ms-clear]:hidden"
+                                                        autoComplete="new-password"
+                                                        onChange={(e) =>
+                                                            setData(
+                                                                "password_confirmation",
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                        required
+                                                        placeholder="••••••••"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            setShowConfirmPassword(
+                                                                !showConfirmPassword
+                                                            )
+                                                        }
+                                                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                                                    >
+                                                        {showConfirmPassword ? (
+                                                            <EyeOff size={18} />
+                                                        ) : (
+                                                            <Eye size={18} />
+                                                        )}
+                                                    </button>
+                                                </div>
+                                                <InputError
+                                                    message={
+                                                        errors.password_confirmation
+                                                    }
+                                                    className="mt-1"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <PrimaryButton
+                                            className="w-full justify-center py-4 mt-6 rounded-xl text-base font-bold bg-gray-900 hover:bg-rakit-900 shadow-lg shadow-gray-900/20 active:scale-[0.98] transition-all"
+                                            disabled={processing}
+                                        >
+                                            {processing
+                                                ? "Memproses..."
+                                                : "Buat Akun Sekarang"}
+                                        </PrimaryButton>
+                                    </form>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
-                )}
+                </div>
             </div>
-        </div>
+        </GuestLayout>
     );
 }
