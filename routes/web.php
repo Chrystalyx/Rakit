@@ -172,69 +172,15 @@ Route::get('/crafter/project/{id}', function ($id) {
         $status = 'Finishing';
     }
 
-    // Struktur Data yang SAMA PERSIS dengan kebutuhan ProjectDetail.jsx
-    $projectData = [
-        'id' => $id,
-        'title' => $projectTitle,
-        'status' => $status, // Produksi, Finishing, dll
-        'client' => 'Budi Santoso',
-        'client_id' => 'USER-123',
-        'client_avatar' => 'https://ui-avatars.com/api/?name=Budi+Santoso&background=random',
-        'address' => 'Apartemen Gateway, Tower A, Lt. 12, Bandung',
-        'deadline' => '15 Nov 2023',
-        
-        // Data Timeline Pengerjaan
-        'timeline' => [
-            [
-                'stage' => 'Pembayaran DP & Verifikasi', 
-                'status' => 'completed', 
-                'date' => '20 Oct 2023'
-            ],
-            [
-                'stage' => 'Pembelian Material', 
-                'status' => 'completed', 
-                'date' => '22 Oct 2023'
-            ],
-            [
-                'stage' => 'Produksi (Potong & Rakit)', 
-                'status' => $id == 'AP-002' ? 'completed' : 'current', // Simulasi beda status
-                'date' => 'Sedang Berjalan'
-            ],
-            [
-                'stage' => 'Finishing & Quality Control', 
-                'status' => $id == 'AP-002' ? 'current' : 'upcoming', 
-                'date' => 'Estimasi 10 Nov'
-            ],
-            [
-                'stage' => 'Pengiriman & Instalasi', 
-                'status' => 'upcoming', 
-                'date' => '15 Nov 2023'
-            ],
-        ],
+// --- ROUTE UNTUK CUSTOMER (PUBLIC VIEW) ---
+Route::get('/crafter/view/{id}', function () {
+    return Inertia::render('Customer/CrafterPortfolio');
+})->name('customer.crafter.show');
 
-        // Data Spesifikasi Teknis (Dari Configurator)
-        'specs' => [
-            'materialName' => 'Multiplek Meranti 18mm',
-            'finishing' => 'HPL Taco TH-888 (Wood Grain)',
-            'width' => 240,
-            'height' => 80,
-            'depth' => 60,
-            'plinth' => 10,
-            'backPanel' => true,
-            'partitions' => 4,
-            'shelves' => 2,
-            'ledStrip' => true,
-            'doorType' => 'swing', // none, swing, sliding
-            'lock' => true
-        ],
-
-        // Nilai Jasa (RAB)
-        'fee' => 8500000 
-    ];
-
-    return Inertia::render('Crafter/ProjectDetail', [
-        'project' => $projectData
-    ]);
-})->name('crafter.project.detail');
+// --- ROUTE UNTUK CRAFTER (CMS / EDIT VIEW) ---
+Route::get('/crafter/dashboard/portfolio', function () {
+    return Inertia::render('Crafter/Portfolio');
+})->name('crafter.portfolio.edit');
+});
 
 require __DIR__ . '/auth.php';
