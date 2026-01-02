@@ -33,7 +33,7 @@ export default function Header() {
             { name: "Beranda", href: "/dashboard" },
             { name: "Rakit Kabinet", href: "/Customize/Index" },
             { name: "Pengrajin", href: "/crafters" },
-            { name: "Lihat Progress", href: "#" },
+            { name: "Lihat Progress", href: "/my-orders" },
             { name: "History Transaksi", href: "/transactions" },
         ];
     }, [user]);

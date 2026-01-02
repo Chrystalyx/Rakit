@@ -15,83 +15,14 @@ import {
     CalendarDays,
 } from "lucide-react";
 
-// Import Visualizer
 import Visualizer from "../Customize/Visualizer";
 
-// --- DUMMY DATA ---
-const DUMMY_ORDERS = [
-    {
-        id: "INV-2311-8890",
-        productName: "Lemari Pakaian 3 Pintu Custom",
-        crafter: "Workshop Kayu Jati",
-        date: "20 Okt 2023",
-        price: 4675000,
-        status: "Produksi",
-        progress: 60,
-
-        config: {
-            width: 180,
-            height: 200,
-            depth: 60,
-            plinth: 10,
-            backPanel: true,
-            partitions: 2,
-            shelves: 4,
-            ledStrip: true,
-            doorType: "swing",
-            lock: true,
-            finishingLayer: {
-                id: "hpl-wood",
-                // Pastikan path texture ini valid di project Anda
-                texture:
-                    "/storage/materials/BMSFcDRQDiQEQJ36dUeq10p1lAJ0zBuF6MeffdkC.jpg",
-            },
-        },
-        specs: {
-            material: "Multiplek Meranti 18mm",
-            finish: "HPL Taco - Folk Walnut",
-        },
-    },
-    {
-        id: "INV-2311-7721",
-        productName: "Rak TV Minimalis Modern",
-        crafter: "Bengkel Las Maju Jaya",
-        date: "15 Okt 2023",
-        price: 2150000,
-        status: "Pengiriman",
-        progress: 90,
-
-        config: {
-            width: 150,
-            height: 60,
-            depth: 40,
-            plinth: 0,
-            backPanel: false,
-            partitions: 3,
-            shelves: 2,
-            ledStrip: false,
-            doorType: "none",
-            lock: false,
-            finishingLayer: {
-                id: "hpl-solid",
-                // Pastikan path texture ini valid
-                texture:
-                    "/storage/materials/HFK1lgqSwfZPSckzrsRkL7fxR00tcQ6cvAmZXO9V.jpg",
-            },
-        },
-        specs: {
-            material: "Blockboard 15mm",
-            finish: "Duco White Matte",
-        },
-    },
-];
-
-export default function OrderList() {
+export default function OrderList({ orders = [] }) {
     const [filter, setFilter] = useState("all");
 
-    const filteredOrders = DUMMY_ORDERS.filter((order) => {
+    const filteredOrders = orders.filter((order) => {
         if (filter === "all") return true;
-        if (filter === "active") return order.status !== "Selesai";
+        if (filter === "active") return order.status !== "Selesai" && order.status !== "Dibatalkan";
         if (filter === "completed") return order.status === "Selesai";
         return true;
     });
@@ -115,7 +46,7 @@ export default function OrderList() {
                         </div>
 
                         <Link
-                            href="/customize"
+                            href="/Customize/Index"
                             className="inline-flex items-center gap-2 px-6 py-3 bg-rakit-800 text-white rounded-xl font-bold hover:bg-rakit-900 transition shadow-lg shadow-rakit-800/20 active:scale-95"
                         >
                             <Package size={20} />
@@ -133,11 +64,10 @@ export default function OrderList() {
                             <button
                                 key={tab.id}
                                 onClick={() => setFilter(tab.id)}
-                                className={`px-5 py-3 text-sm font-bold transition-all whitespace-nowrap border-b-2 -mb-px ${
-                                    filter === tab.id
-                                        ? "border-rakit-800 text-rakit-800"
-                                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                                }`}
+                                className={`px-5 py-3 text-sm font-bold transition-all whitespace-nowrap border-b-2 -mb-px ${filter === tab.id
+                                    ? "border-rakit-800 text-rakit-800"
+                                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                    }`}
                             >
                                 {tab.label}
                             </button>
@@ -164,7 +94,6 @@ export default function OrderList() {
     );
 }
 
-// --- SUB-COMPONENT: ORDER CARD ---
 function OrderCard({ order, index }) {
     const getStatusStyle = (status) => {
         switch (status) {
@@ -309,7 +238,7 @@ function OrderCard({ order, index }) {
                                 )}
                             </p>
                             <Link
-                                href="/track-order"
+                                href={`/customer/track-order/${order.original_id}`}
                                 className="inline-flex items-center gap-2 text-sm font-bold text-rakit-600 hover:text-rakit-800 transition group/link"
                             >
                                 {order.status === "Selesai"
@@ -328,7 +257,6 @@ function OrderCard({ order, index }) {
     );
 }
 
-// --- SUB-COMPONENT: EMPTY STATE ---
 function EmptyState() {
     return (
         <div className="bg-white rounded-[2rem] border border-dashed border-gray-300 p-16 text-center">
@@ -342,12 +270,6 @@ function EmptyState() {
                 Anda belum memiliki transaksi aktif. Mulai desain furnitur
                 impian Anda sekarang juga.
             </p>
-            <Link
-                href="/customize"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-rakit-800 text-white rounded-xl font-bold hover:bg-rakit-900 transition shadow-xl shadow-rakit-800/20"
-            >
-                Mulai Desain Sekarang <ArrowRight size={18} />
-            </Link>
         </div>
     );
 }

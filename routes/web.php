@@ -12,6 +12,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\TransactionController;
+
 use App\Http\Controllers\Auth\SocialAuthController;
 
 use App\Http\Controllers\Admin\OrderController;
@@ -22,6 +23,8 @@ use App\Http\Controllers\Admin\CrafterController as AdminCrafterController;
 
 use App\Http\Controllers\Crafter\DashboardController as CrafterDashboardController;
 use App\Http\Controllers\Crafter\PublicCrafterController;
+
+use App\Http\Controllers\Customer\OrderController as CustomerOrderController;
 
 Route::get('/', function () {
     return Inertia::render('Dashboard', [
@@ -41,7 +44,6 @@ Route::get('/transaction/{id}', function ($id) {
 })->name('transactions.show');
 
 Route::get('/pengrajin', function () {
-    // Sesuai lokasi file: resources/js/Pages/Customer/ChooseCrafter.jsx
     return Inertia::render('Customer/ChooseCrafter');
 })->name('crafter.index');
 
@@ -72,7 +74,7 @@ Route::get('/crafter/{id}', [PublicCrafterController::class, 'show'])
     ->name('public.crafters.show')
     ->where('id', '[0-9]+');
 
-    Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::post('/reviews', [WelcomeController::class, 'store'])->name('reviews.store');
 });
 
@@ -101,6 +103,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->name('customer.')->group(function () {
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
     Route::get('/transaction/{id}', [TransactionController::class, 'show'])->name('transactions.show');
+
+    Route::get('/my-orders', [CustomerOrderController::class, 'index'])->name('orders.index');
+    Route::get('/track-order/{id}', [CustomerOrderController::class, 'show'])->name('orders.show');
 
     Route::get('/dashboard', function () {
         return Inertia::render('Dashboard');
@@ -160,27 +165,27 @@ Route::get('/my-orders', function () {
 
 // ROUTE KHUSUS UNTUK DETAIL PROYEK CRAFTER (DUMMY DATA)
 Route::get('/crafter/project/{id}', function ($id) {
-    
+
     // Kita simulasi data berbeda sedikit berdasarkan ID agar terlihat dinamis
     // Jika ID = 'AP-002', kita ubah judulnya, sisanya default.
-    
+
     $projectTitle = 'Kitchen Set Minimalis - Apartemen Gateway';
     $status = 'Produksi';
-    
+
     if ($id == 'AP-002') {
         $projectTitle = 'Lemari Wardrobe 4 Pintu (Full Cermin)';
         $status = 'Finishing';
     }
 
-// --- ROUTE UNTUK CUSTOMER (PUBLIC VIEW) ---
-Route::get('/crafter/view/{id}', function () {
-    return Inertia::render('Customer/CrafterPortfolio');
-})->name('customer.crafter.show');
+    // --- ROUTE UNTUK CUSTOMER (PUBLIC VIEW) ---
+    Route::get('/crafter/view/{id}', function () {
+        return Inertia::render('Customer/CrafterPortfolio');
+    })->name('customer.crafter.show');
 
-// --- ROUTE UNTUK CRAFTER (CMS / EDIT VIEW) ---
-Route::get('/crafter/dashboard/portfolio', function () {
-    return Inertia::render('Crafter/Portfolio');
-})->name('crafter.portfolio.edit');
+    // --- ROUTE UNTUK CRAFTER (CMS / EDIT VIEW) ---
+    Route::get('/crafter/dashboard/portfolio', function () {
+        return Inertia::render('Crafter/Portfolio');
+    })->name('crafter.portfolio.edit');
 });
 
 require __DIR__ . '/auth.php';

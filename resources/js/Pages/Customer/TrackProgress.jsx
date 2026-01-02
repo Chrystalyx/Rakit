@@ -25,7 +25,6 @@ import {
 import Visualizer from "../Customize/Visualizer";
 import ChatWindow from "@/Components/Chat/ChatWindow";
 
-// --- HELPERS ---
 const formatRp = (val) => new Intl.NumberFormat("id-ID").format(val);
 
 const SpecRow = ({ label, value }) => (
@@ -37,7 +36,6 @@ const SpecRow = ({ label, value }) => (
     </div>
 );
 
-// --- KOMPONEN MODAL CHAT ---
 const ChatModal = ({ isOpen, onClose, activeChat }) => (
     <AnimatePresence>
         {isOpen && (
@@ -76,7 +74,6 @@ const ChatModal = ({ isOpen, onClose, activeChat }) => (
     </AnimatePresence>
 );
 
-// --- KOMPONEN ITEM UPDATE (FOTO/CATATAN) ---
 const UpdateItem = ({ update }) => {
     const [zoom, setZoom] = useState(false);
 
@@ -147,98 +144,13 @@ const UpdateItem = ({ update }) => {
             </AnimatePresence>
         </div>
     );
-};
+}
 
-// --- DATA DUMMY (MOCK) ---
-const DUMMY_ORDER = {
-    id: "INV-2311-8890",
-    status: "Produksi",
-    purchaseDate: "20 Okt 2023",
-    totalPrice: 4675000,
-
-    crafter: {
-        name: "Workshop Kayu Jati",
-        location: "Bandung, Jawa Barat",
-        avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop",
-        verified: true,
-    },
-
-    product: {
-        name: "Lemari Pakaian 3 Pintu Custom",
-        width: 180,
-        height: 200,
-        depth: 60,
-        plinth: 10,
-        backPanel: true,
-        partitions: 2,
-        shelves: 4,
-        ledStrip: true,
-        doorType: "swing",
-        lock: true,
-        components: {
-            base: { name: "Multiplek Meranti 18mm" },
-            finish: { name: "HPL Taco - Folk Walnut" },
-        },
-        finishingLayer: {
-            id: "hpl-solid-1",
-            texture:
-                "/storage/materials/BMSFcDRQDiQEQJ36dUeq10p1lAJ0zBuF6MeffdkC.jpg",
-        },
-    },
-
-    // Timeline yang SUDAH digabung dengan updates di dalamnya
-    timeline: [
-        {
-            stage: "Pesanan Dikonfirmasi",
-            date: "20 Okt 2023",
-            status: "completed",
-            updates: [],
-        },
-        {
-            stage: "Pembelian Material",
-            date: "22 Okt 2023",
-            status: "completed",
-            updates: [
-                {
-                    date: "22 Okt, 09:15",
-                    note: "Halo kak, pesanan sudah kami terima. Kami akan mulai belanja material besok pagi ya.",
-                    photo: null,
-                },
-            ],
-        },
-        {
-            stage: "Pengerjaan (Potong & Rakit)",
-            date: "Sedang Berjalan",
-            status: "current",
-            updates: [
-                {
-                    date: "25 Okt, 14:30",
-                    note: "Material multiplek meranti 18mm sudah tiba di workshop. Kualitas grade A sesuai pesanan.",
-                    photo: "https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?auto=format&fit=crop&q=80&w=600",
-                },
-                {
-                    date: "27 Okt, 10:00",
-                    note: "Proses pemotongan bahan sudah 50%. Lanjut perakitan rangka.",
-                    photo: "https://images.unsplash.com/photo-1629016843648-4034eb224429?auto=format&fit=crop&q=80&w=600",
-                },
-            ],
-        },
-        {
-            stage: "Finishing & QC",
-            date: "Estimasi 5 Nov",
-            status: "upcoming",
-            updates: [],
-        },
-        { stage: "Pengiriman", date: "-", status: "upcoming", updates: [] },
-    ],
-};
-
-export default function TrackProgress() {
+export default function TrackProgress({ order }) {
     const [isChatOpen, setIsChatOpen] = useState(false);
-    const order = DUMMY_ORDER;
 
     const chatProfile = {
-        id: "crafter-001",
+        id: "crafter-" + order.crafter.name,
         name: order.crafter.name,
         avatar: order.crafter.avatar,
         role: "Mitra Pengrajin",
@@ -254,7 +166,7 @@ export default function TrackProgress() {
                     {/* 1. HEADER & NAVIGATION */}
                     <div className="mb-8">
                         <Link
-                            href="/my-orders"
+                            href="/customer/my-orders"
                             className="flex items-center text-sm font-bold text-gray-500 hover:text-rakit-800 mb-6 transition w-fit"
                         >
                             <ChevronLeft size={18} /> Kembali ke Pesanan Saya
@@ -283,25 +195,23 @@ export default function TrackProgress() {
                                     "Pengiriman",
                                     "Selesai",
                                 ].map((step, i) => {
-                                    const isActive = i <= 1; // Logic simulasi (current stage = Produksi/1)
+                                    const isActive = i <= 1;
                                     return (
                                         <div
                                             key={i}
                                             className="flex items-center"
                                         >
                                             <div
-                                                className={`flex flex-col items-center gap-2 ${
-                                                    isActive
-                                                        ? "text-rakit-800"
-                                                        : "text-gray-300"
-                                                }`}
+                                                className={`flex flex-col items-center gap-2 ${isActive
+                                                    ? "text-rakit-800"
+                                                    : "text-gray-300"
+                                                    }`}
                                             >
                                                 <div
-                                                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all ${
-                                                        isActive
-                                                            ? "bg-rakit-50 border-rakit-600"
-                                                            : "bg-white border-gray-200"
-                                                    }`}
+                                                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all ${isActive
+                                                        ? "bg-rakit-50 border-rakit-600"
+                                                        : "bg-white border-gray-200"
+                                                        }`}
                                                 >
                                                     {i + 1}
                                                 </div>
@@ -311,11 +221,10 @@ export default function TrackProgress() {
                                             </div>
                                             {i !== 3 && (
                                                 <div
-                                                    className={`w-8 md:w-16 h-0.5 mx-1 md:mx-2 transition-all ${
-                                                        i < 1
-                                                            ? "bg-rakit-600"
-                                                            : "bg-gray-200"
-                                                    }`}
+                                                    className={`w-8 md:w-16 h-0.5 mx-1 md:mx-2 transition-all ${i < 1
+                                                        ? "bg-rakit-600"
+                                                        : "bg-gray-200"
+                                                        }`}
                                                 ></div>
                                             )}
                                         </div>
@@ -346,31 +255,29 @@ export default function TrackProgress() {
                                             {/* Garis Vertikal */}
                                             {idx !==
                                                 order.timeline.length - 1 && (
-                                                <div
-                                                    className={`absolute left-[11px] top-8 bottom-0 w-0.5 ${
-                                                        step.status ===
-                                                        "completed"
+                                                    <div
+                                                        className={`absolute left-[11px] top-8 bottom-0 w-0.5 ${step.status ===
+                                                            "completed"
                                                             ? "bg-green-500"
                                                             : "bg-gray-200"
-                                                    }`}
-                                                ></div>
-                                            )}
+                                                            }`}
+                                                    ></div>
+                                                )}
 
                                             {/* Icon Bulat */}
                                             <div
-                                                className={`relative z-10 w-6 h-6 rounded-full border-2 shrink-0 mt-1 transition-all flex items-center justify-center ${
-                                                    step.status === "completed"
-                                                        ? "bg-green-500 border-green-500 text-white"
-                                                        : step.status ===
-                                                          "current"
+                                                className={`relative z-10 w-6 h-6 rounded-full border-2 shrink-0 mt-1 transition-all flex items-center justify-center ${step.status === "completed"
+                                                    ? "bg-green-500 border-green-500 text-white"
+                                                    : step.status ===
+                                                        "current"
                                                         ? "bg-white border-blue-600 text-blue-600 ring-4 ring-blue-50"
                                                         : "bg-white border-gray-300 text-gray-300"
-                                                }`}
+                                                    }`}
                                             >
                                                 {step.status ===
                                                     "completed" && (
-                                                    <CheckCircle2 size={14} />
-                                                )}
+                                                        <CheckCircle2 size={14} />
+                                                    )}
                                                 {step.status === "current" && (
                                                     <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
                                                 )}
@@ -381,12 +288,11 @@ export default function TrackProgress() {
                                                 <div className="flex justify-between items-start">
                                                     <div>
                                                         <h4
-                                                            className={`font-bold text-base ${
-                                                                step.status ===
+                                                            className={`font-bold text-base ${step.status ===
                                                                 "current"
-                                                                    ? "text-blue-700"
-                                                                    : "text-gray-900"
-                                                            }`}
+                                                                ? "text-blue-700"
+                                                                : "text-gray-900"
+                                                                }`}
                                                         >
                                                             {step.stage}
                                                         </h4>
