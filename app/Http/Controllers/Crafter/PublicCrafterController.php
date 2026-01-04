@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Crafter;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Project;
+use App\Models\ProjectRejection;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -96,6 +98,70 @@ class PublicCrafterController extends Controller
 
         return Inertia::render('Customer/CrafterPortfolio', [
             'crafter' => $crafterData
+        ]);
+    }
+
+    public function choose(Request $request)
+    {
+        $query = User::where('role', 'crafter')
+            ->whereHas('crafterProfile', function ($q) {
+                $q->where('is_verified', true);
+            });
+
+        if ($request->has('reorder_id')) {
+            $rejectedCrafterIds = \App\Models\ProjectRejection::where('project_id', $request->reorder_id)
+                ->pluck('crafter_id')
+                ->toArray();
+
+            $currentProject = Project::find($request->reorder_id);
+            if ($currentProject && $currentProject->crafter_id) {
+                $rejectedCrafterIds[] = $currentProject->crafter_id;
+            }
+
+            if (!empty($rejectedCrafterIds)) {
+                $query->whereNotIn('id', $rejectedCrafterIds);
+            }
+        }
+
+        if ($request->search) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        if ($request->location && $request->location !== 'Semua') {
+            $query->whereHas('crafterProfile', function ($q) use ($request) {
+                $q->where('address', 'like', '%' . $request->location . '%');
+            });
+        }
+
+        $crafters = $query->with(['crafterProfile', 'crafterProfile.portfolios'])
+            ->get()
+            ->map(function ($user) {
+                $profile = $user->crafterProfile;
+
+                $cover = 'https://images.unsplash.com/photo-1618220179428-22790b461013?w=800&q=80';
+
+                if ($profile && $profile->portfolios && $profile->portfolios->isNotEmpty()) {
+                    $cover = $profile->portfolios->first()->image_url;
+                }
+
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'location' => $profile->address ?? 'Indonesia',
+                    'rating' => (float) ($profile->rating_skill ?? 0),
+                    'reviews' => 0,
+                    'projects' => $profile->portfolios->count(),
+                    'verified' => (bool) $profile->is_verified,
+                    'avatar' => $user->avatar ?? "https://ui-avatars.com/api/?name=" . urlencode($user->name),
+                    'cover' => $cover,
+                    'status' => 'Available',
+                    'specialties' => $profile->skills ? json_decode($profile->skills) : [],
+                ];
+            });
+
+        return Inertia::render('Customer/ChooseCrafter', [
+            'crafters' => $crafters,
+            'filters' => $request->only(['search', 'location']),
         ]);
     }
 }

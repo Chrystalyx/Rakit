@@ -190,46 +190,66 @@ class DashboardController extends Controller
                     'id' => $project->id,
                     'title' => $project->title,
                     'client' => $project->customer->name ?? 'Klien',
-                    'status' => 'On Progress',
                     'deadline' => $project->end_date
                         ? Carbon::parse($project->end_date)->diffForHumans()
                         : '-',
-                    'progress' => $project->progress ?? 50,
+                    'progress' => 50,
+                    'status' => 'On Progress',
                 ];
             });
 
-        $newRequests = Project::whereNull('crafter_id')
+        $newRequests = Project::where('crafter_id', $user->id)
             ->where('status', 'pending')
-            ->with('customer')
+            ->with('customer.crafterProfile')
             ->latest()
             ->get()
             ->map(function ($project) {
+
+                $specs = $project->specifications ?? [];
+
                 return [
                     'id' => $project->id,
                     'title' => $project->title,
                     'budget' => "Rp " . number_format($project->total_amount, 0, ',', '.'),
                     'location' => $project->address ?? 'Online',
+                    'created_at_human' => $project->created_at->diffForHumans(),
+
+                    'customer' => [
+                        'name' => $project->customer->name ?? 'Tanpa Nama',
+                        'avatar' => $project->customer->avatar ?? "https://ui-avatars.com/api/?name=" . urlencode($project->customer->name ?? 'U'),
+                        'address' => $project->address ?? 'Alamat tidak tersedia',
+                    ],
+
+                    'specs' => [
+                        'width' => $specs['width'] ?? 0,
+                        'height' => $specs['height'] ?? 0,
+                        'depth' => $specs['depth'] ?? 0,
+                        'plinth' => $specs['plinth'] ?? 0,
+
+                        'baseMaterial' => $specs['components']['base']['name'] ?? '-',
+                        'finishing' => $specs['components']['finish']['name'] ?? '-',
+
+                        'partitions' => $specs['partitions'] ?? 0,
+                        'shelves' => $specs['shelves'] ?? 0,
+                        'ledStrip' => $specs['ledStrip'] ?? false,
+                        'doorType' => ucfirst($specs['doorType'] ?? 'None'),
+                        'lock' => $specs['lock'] ?? false,
+                    ]
                 ];
             });
 
-        $rating = (float) ($user->crafterProfile->rating_skill ?? 0);
-
-        $completedProjects = Project::where('crafter_id', $user->id)
-            ->where('status', 'completed')
-            ->count();
-
-        $monthlyIncome = Project::where('crafter_id', $user->id)
-            ->where('status', 'completed')
-            ->whereMonth('updated_at', Carbon::now()->month)
-            ->sum('platform_fee');
+        $profile = $user->crafterProfile;
 
         $crafterData = [
             'name' => $user->name,
-            'level' => ucfirst($user->crafterProfile->level ?? 'Pemula'),
+            'level' => ucfirst($profile->level ?? 'Pemula'),
             'active_projects' => $activeProjects->count(),
-            'completed_projects' => $completedProjects,
-            'rating' => $rating,
-            'monthly_income' => (int) $monthlyIncome
+            'rating' => (float) ($profile->rating_skill ?? 0),
+            'completed_projects' => Project::where('crafter_id', $user->id)->where('status', 'completed')->count(),
+            'monthly_income' => (int) Project::where('crafter_id', $user->id)
+                ->where('status', 'completed')
+                ->whereMonth('updated_at', Carbon::now()->month)
+                ->sum('platform_fee')
         ];
 
         return Inertia::render('Crafter/ProjectList', [

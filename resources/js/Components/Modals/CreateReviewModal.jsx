@@ -10,7 +10,6 @@ export default function CreateReviewModal({ isOpen, onClose }) {
         comment: "",
     });
 
-    // Handle hover state untuk bintang
     const [hoverRating, setHoverRating] = useState(0);
 
     const submit = (e) => {

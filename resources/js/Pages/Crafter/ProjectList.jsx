@@ -1,60 +1,86 @@
 import React, { useState } from "react";
-import { Head, Link } from "@inertiajs/react";
+import { Head, Link, router } from "@inertiajs/react";
 import GuestLayout from "@/Layouts/GuestLayout";
 import toast, { Toaster } from "react-hot-toast";
 import BursaModal from "@/Components/Modals/BursaModal";
 import {
-    Hammer,
-    Briefcase,
-    Banknote,
-    Star,
-    Clock,
-    CheckCircle2,
-    TrendingUp,
-    MapPin,
+    Hammer, Briefcase, Banknote, Star, Clock, CheckCircle2, TrendingUp, MapPin, X, AlertCircle
 } from "lucide-react";
 
 export default function ProjectList({ crafter, activeProjects, newRequests }) {
-    // --- STATE UNTUK MODAL ---
     const [selectedRequest, setSelectedRequest] = useState(null);
+    const [isProcessing, setIsProcessing] = useState(false);
 
-    // --- HANDLERS ---
+    const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+    const [rejectReason, setRejectReason] = useState("");
+
     const handleOpenModal = (req) => {
         setSelectedRequest(req);
     };
 
     const handleCloseModal = () => {
-        setSelectedRequest(null);
+        if (!isProcessing) {
+            setSelectedRequest(null);
+        }
     };
 
     const handleAccept = () => {
-        // Disini nanti logika backend (Inertia.post)
-        toast.success(
-            "Proyek berhasil diambil! Silakan cek tab 'Proyek Berjalan'.",
-            {
-                style: {
-                    borderRadius: "10px",
-                    background: "#333",
-                    color: "#fff",
-                },
-                iconTheme: {
-                    primary: "#10B981",
-                    secondary: "#FFFAEE",
-                },
+        if (!selectedRequest) return;
+        setIsProcessing(true);
+
+        router.patch(route('projects.accept', selectedRequest.id), {}, {
+            onSuccess: () => {
+                toast.success(
+                    "Proyek berhasil diambil!",
+                    {
+                        style: {
+                            borderRadius: "10px",
+                            background: "#333",
+                            color: "#fff",
+                        },
+                        iconTheme: {
+                            primary: "#10B981",
+                            secondary: "#FFFAEE",
+                        },
+                    }
+                );
+                setSelectedRequest(null);
+                setIsProcessing(false);
+            },
+            onError: () => {
+                toast.error("Gagal mengambil proyek. Coba lagi nanti.");
+                setIsProcessing(false);
             }
-        );
-        handleCloseModal();
+        });
     };
 
-    const handleReject = () => {
-        toast.error("Penawaran proyek ditolak.", {
-            style: {
-                borderRadius: "10px",
-                background: "#333",
-                color: "#fff",
+    const handleRejectClick = () => {
+        setIsRejectModalOpen(true);
+    };
+
+    const submitReject = () => {
+        if (!rejectReason.trim()) {
+            toast.error("Mohon isi alasan penolakan.");
+            return;
+        }
+
+        setIsProcessing(true);
+
+        router.patch(route('projects.reject', selectedRequest.id), {
+            reason: rejectReason
+        }, {
+            onSuccess: () => {
+                toast.success("Penawaran ditolak.");
+                setIsRejectModalOpen(false);
+                setRejectReason("");
+                setSelectedRequest(null);
+                setIsProcessing(false);
             },
+            onError: () => {
+                toast.error("Gagal menolak proyek.");
+                setIsProcessing(false);
+            }
         });
-        handleCloseModal();
     };
 
     return (
@@ -64,6 +90,7 @@ export default function ProjectList({ crafter, activeProjects, newRequests }) {
 
             <div className="min-h-screen bg-rakit-50 py-12 relative">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
                     {/* --- HEADER SECTION --- */}
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                         <div>
@@ -96,26 +123,14 @@ export default function ProjectList({ crafter, activeProjects, newRequests }) {
                             <div className="absolute right-0 top-0 w-24 h-24 bg-rakit-50 rounded-bl-full -mr-4 -mt-4 transition-colors group-hover:bg-rakit-100"></div>
                             <div className="relative z-10">
                                 <div className="flex items-center gap-2 text-gray-500 mb-2">
-                                    <Banknote
-                                        size={18}
-                                        className="text-green-600"
-                                    />
-                                    <span className="text-sm font-medium">
-                                        Pendapatan Bulan Ini
-                                    </span>
+                                    <Banknote size={18} className="text-green-600" />
+                                    <span className="text-sm font-medium">Pendapatan Bulan Ini</span>
                                 </div>
                                 <h3 className="text-2xl font-bold text-rakit-800">
-                                    Rp{" "}
-                                    {new Intl.NumberFormat("id-ID").format(
-                                        crafter?.monthly_income || 0
-                                    )}
+                                    Rp {new Intl.NumberFormat("id-ID").format(crafter?.monthly_income || 0)}
                                 </h3>
                                 <p className="text-xs text-gray-400 mt-2 flex items-center gap-1">
-                                    <TrendingUp
-                                        size={12}
-                                        className="text-green-500"
-                                    />{" "}
-                                    Target: Rp 10jt
+                                    <TrendingUp size={12} className="text-green-500" /> Target: Rp 10jt
                                 </p>
                             </div>
                         </div>
@@ -124,53 +139,37 @@ export default function ProjectList({ crafter, activeProjects, newRequests }) {
                         <div className="bg-white p-6 rounded-2xl border border-rakit-200 shadow-sm group hover:border-rakit-300 transition">
                             <div className="flex items-center gap-2 text-gray-500 mb-2">
                                 <Hammer size={18} />
-                                <span className="text-sm font-medium">
-                                    Proyek Berjalan
-                                </span>
+                                <span className="text-sm font-medium">Proyek Berjalan</span>
                             </div>
                             <h3 className="text-3xl font-bold text-rakit-800">
                                 {crafter?.active_projects || 0}
                             </h3>
-                            <p className="text-xs text-gray-400 mt-2">
-                                Fokus utama Anda
-                            </p>
+                            <p className="text-xs text-gray-400 mt-2">Fokus utama Anda</p>
                         </div>
 
                         {/* Rating */}
                         <div className="bg-white p-6 rounded-2xl border border-rakit-200 shadow-sm group hover:border-rakit-300 transition">
                             <div className="flex items-center gap-2 text-gray-500 mb-2">
                                 <Star size={18} />
-                                <span className="text-sm font-medium">
-                                    Rating Kualitas
-                                </span>
+                                <span className="text-sm font-medium">Rating Kualitas</span>
                             </div>
                             <div className="flex items-end gap-2">
-                                <h3 className="text-3xl font-bold text-rakit-800">
-                                    {crafter?.rating || 0}
-                                </h3>
+                                <h3 className="text-3xl font-bold text-rakit-800">{crafter?.rating || 0}</h3>
                                 <div className="flex text-yellow-400 mb-1.5">
                                     <Star size={14} fill="currentColor" />
                                 </div>
                             </div>
-                            <p className="text-xs text-gray-400 mt-2">
-                                Pertahankan kualitas!
-                            </p>
+                            <p className="text-xs text-gray-400 mt-2">Pertahankan kualitas!</p>
                         </div>
 
                         {/* Total Selesai */}
                         <div className="bg-white p-6 rounded-2xl border border-rakit-200 shadow-sm group hover:border-rakit-300 transition">
                             <div className="flex items-center gap-2 text-gray-500 mb-2">
                                 <Briefcase size={18} />
-                                <span className="text-sm font-medium">
-                                    Total Selesai
-                                </span>
+                                <span className="text-sm font-medium">Total Selesai</span>
                             </div>
-                            <h3 className="text-3xl font-bold text-rakit-800">
-                                {crafter?.completed_projects || 0}
-                            </h3>
-                            <p className="text-xs text-gray-400 mt-2">
-                                Proyek yang telah anda selesaikan
-                            </p>
+                            <h3 className="text-3xl font-bold text-rakit-800">{crafter?.completed_projects || 0}</h3>
+                            <p className="text-xs text-gray-400 mt-2">Proyek seumur hidup</p>
                         </div>
                     </div>
 
@@ -184,8 +183,7 @@ export default function ProjectList({ crafter, activeProjects, newRequests }) {
                                     </h3>
                                 </div>
                                 <div className="divide-y divide-rakit-100">
-                                    {activeProjects &&
-                                    activeProjects.length > 0 ? (
+                                    {activeProjects && activeProjects.length > 0 ? (
                                         activeProjects.map((project) => (
                                             <div
                                                 key={project.id}
@@ -202,13 +200,9 @@ export default function ProjectList({ crafter, activeProjects, newRequests }) {
                                                     </div>
                                                     <p className="text-sm text-gray-500 mb-4 flex items-center gap-2">
                                                         {project.client}
-                                                        <span className="text-gray-300">
-                                                            |
-                                                        </span>
+                                                        <span className="text-gray-300">|</span>
                                                         <span className="text-red-500 flex items-center gap-1 font-medium bg-red-50 px-2 py-0.5 rounded">
-                                                            <Clock size={12} />{" "}
-                                                            Deadline{" "}
-                                                            {project.deadline}
+                                                            <Clock size={12} /> Deadline {project.deadline}
                                                         </span>
                                                     </p>
                                                     <div className="w-full bg-gray-200 rounded-full h-2.5 mb-1">
@@ -243,20 +237,14 @@ export default function ProjectList({ crafter, activeProjects, newRequests }) {
                         <div className="space-y-6">
                             <div className="bg-white rounded-2xl border border-rakit-200 shadow-sm p-6 sticky top-6">
                                 <h3 className="font-bold text-rakit-800 text-lg mb-4 flex items-center gap-2">
-                                    <Briefcase
-                                        size={20}
-                                        className="text-rakit-500"
-                                    />{" "}
-                                    Bursa Proyek Baru
+                                    <Briefcase size={20} className="text-rakit-500" /> Bursa Proyek Baru
                                 </h3>
                                 <div className="space-y-4">
                                     {newRequests && newRequests.length > 0 ? (
                                         newRequests.map((req) => (
                                             <div
                                                 key={req.id}
-                                                onClick={() =>
-                                                    handleOpenModal(req)
-                                                }
+                                                onClick={() => handleOpenModal(req)}
                                                 className="p-4 rounded-xl border border-rakit-100 bg-rakit-50/50 hover:border-rakit-300 hover:shadow-md transition-all cursor-pointer group relative overflow-hidden"
                                             >
                                                 <div className="flex justify-between items-start relative z-10">
@@ -268,8 +256,7 @@ export default function ProjectList({ crafter, activeProjects, newRequests }) {
 
                                                 <div className="flex justify-between text-sm text-gray-500 mt-2 relative z-10">
                                                     <span className="flex items-center gap-1">
-                                                        <MapPin size={12} />{" "}
-                                                        {req.location}
+                                                        <MapPin size={12} /> {req.location}
                                                     </span>
                                                     <span className="font-bold text-rakit-600">
                                                         {req.budget}
@@ -294,14 +281,52 @@ export default function ProjectList({ crafter, activeProjects, newRequests }) {
                     </div>
                 </div>
 
-                {/* --- MEMANGGIL MODAL DARI COMPONENT TERPISAH --- */}
+                {/* --- MEMANGGIL MODAL --- */}
                 <BursaModal
-                    isOpen={!!selectedRequest}
+                    isOpen={!!selectedRequest && !isRejectModalOpen}
                     onClose={handleCloseModal}
                     request={selectedRequest}
                     onAccept={handleAccept}
-                    onReject={handleReject}
+                    onReject={handleRejectClick}
                 />
+
+                {isRejectModalOpen && (
+                    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+                        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsRejectModalOpen(false)}></div>
+                        <div className="relative bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 overflow-hidden animate-in fade-in zoom-in duration-200">
+                            <div className="flex items-center gap-3 mb-4 text-red-600">
+                                <AlertCircle size={24} />
+                                <h3 className="text-lg font-bold">Tolak Proyek</h3>
+                            </div>
+                            <p className="text-sm text-gray-600 mb-4">
+                                Mengapa Anda menolak proyek ini? Alasan ini akan dikirimkan kepada Customer agar mereka dapat memilih pengrajin lain.
+                            </p>
+                            <textarea
+                                value={rejectReason}
+                                onChange={(e) => setRejectReason(e.target.value)}
+                                className="w-full border-gray-300 rounded-xl focus:border-red-500 focus:ring-red-500 text-sm mb-6"
+                                rows="4"
+                                placeholder="Contoh: Maaf, jadwal saya sedang penuh bulan ini..."
+                                autoFocus
+                            ></textarea>
+                            <div className="flex gap-3 justify-end">
+                                <button
+                                    onClick={() => setIsRejectModalOpen(false)}
+                                    className="px-4 py-2 text-sm font-bold text-gray-500 hover:bg-gray-100 rounded-lg transition"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    onClick={submitReject}
+                                    disabled={isProcessing}
+                                    className="px-4 py-2 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg transition shadow-lg shadow-red-600/20 disabled:opacity-50"
+                                >
+                                    {isProcessing ? 'Mengirim...' : 'Kirim Penolakan'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </GuestLayout>
     );

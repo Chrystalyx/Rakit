@@ -7,7 +7,7 @@ import {
     ChevronLeft,
     Loader2,
 } from "lucide-react";
-import ChatBubble from "./ChatBubble"; // Pastikan path ini benar sesuai struktur folder Anda
+import ChatBubble from "./ChatBubble";
 
 export default function ChatWindow({ activeChat, onBack, className = "" }) {
     const [messages, setMessages] = useState([]);
@@ -15,11 +15,10 @@ export default function ChatWindow({ activeChat, onBack, className = "" }) {
     const [loading, setLoading] = useState(false);
     const messagesEndRef = useRef(null);
 
-    // 1. FETCH MESSAGES saat activeChat berubah
     useEffect(() => {
-        if (activeChat?.id) { // Gunakan optional chaining & cek ID
+        if (activeChat?.id) {
             setLoading(true);
-            setMessages([]); // Reset pesan lama biar ga kedip pesan user lain
+            setMessages([]);
 
             axios
                 .get(`/chat/messages/${activeChat.id}`)
@@ -33,29 +32,24 @@ export default function ChatWindow({ activeChat, onBack, className = "" }) {
                     setLoading(false);
                 });
         }
-    }, [activeChat?.id]); // Dependency ke ID saja agar lebih stabil
+    }, [activeChat?.id]);
 
-    // Fungsi Auto-scroll ke bawah
     const scrollToBottom = () => {
         setTimeout(() => {
             messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
         }, 100);
     };
 
-    // Scroll setiap kali ada pesan baru
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
 
-    // 2. KIRIM PESAN (DIPERBAIKI)
     const handleSendMessage = (e) => {
         e.preventDefault();
         if (!newMessage.trim()) return;
 
-        // A. Simpan ID sementara untuk tracking
         const tempId = Date.now();
 
-        // B. Buat objek pesan sementara (Optimistic UI)
         const tempMsg = {
             id: tempId,
             sender: "me",
@@ -64,20 +58,17 @@ export default function ChatWindow({ activeChat, onBack, className = "" }) {
                 hour: "2-digit",
                 minute: "2-digit",
             }),
-            status: "sending", // Bisa dipakai untuk styling (misal: warna abu-abu)
+            status: "sending",
         };
 
-        // C. Update UI langsung (tambah pesan sementara)
         setMessages((prev) => [...prev, tempMsg]);
 
-        const messageToSend = newMessage; // Simpan value untuk dikirim
-        setNewMessage(""); // Reset input
+        const messageToSend = newMessage;
+        setNewMessage("");
 
-        // D. Kirim ke Server
         axios
             .post(`/chat/messages/${activeChat.id}`, { message: messageToSend })
             .then((response) => {
-                // E. SUKSES: GANTI pesan sementara dengan data asli dari server
                 setMessages((prev) =>
                     prev.map((msg) =>
                         msg.id === tempId ? response.data : msg
@@ -86,7 +77,6 @@ export default function ChatWindow({ activeChat, onBack, className = "" }) {
             })
             .catch((error) => {
                 console.error("Gagal mengirim pesan:", error);
-                // Opsional: Beri tanda gagal pada pesan
                 setMessages((prev) =>
                     prev.map((msg) =>
                         msg.id === tempId ? { ...msg, status: "failed" } : msg
@@ -95,7 +85,6 @@ export default function ChatWindow({ activeChat, onBack, className = "" }) {
             });
     };
 
-    // Tampilan jika belum memilih kontak
     if (!activeChat) {
         return (
             <div

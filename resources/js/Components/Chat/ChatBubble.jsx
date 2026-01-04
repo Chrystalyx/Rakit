@@ -2,17 +2,15 @@ import React from "react";
 import { Check, CheckCheck } from "lucide-react";
 
 export default function ChatBubble({ message }) {
-    // Cek apakah pesan ini dari "me" (saya)
     const isMe = message.sender === "me";
 
     return (
         <div className={`flex ${isMe ? "justify-end" : "justify-start"} mb-4`}>
             <div
-                className={`max-w-[75%] md:max-w-[60%] rounded-2xl px-4 py-3 shadow-sm relative text-sm ${
-                    isMe
-                        ? "bg-rakit-800 text-white rounded-br-none" // Gaya pesan sendiri
-                        : "bg-white text-gray-800 border border-gray-100 rounded-bl-none" // Gaya pesan orang lain
-                }`}
+                className={`max-w-[75%] md:max-w-[60%] rounded-2xl px-4 py-3 shadow-sm relative text-sm ${isMe
+                        ? "bg-rakit-800 text-white rounded-br-none"
+                        : "bg-white text-gray-800 border border-gray-100 rounded-bl-none"
+                    }`}
             >
                 {/* Tipe Pesan: Gambar (Persiapan fitur masa depan) */}
                 {message.type === "image" && (
@@ -32,9 +30,8 @@ export default function ChatBubble({ message }) {
 
                 {/* Metadata (Waktu & Status) */}
                 <div
-                    className={`flex items-center gap-1 justify-end mt-1 text-[10px] ${
-                        isMe ? "text-rakit-200" : "text-gray-400"
-                    }`}
+                    className={`flex items-center gap-1 justify-end mt-1 text-[10px] ${isMe ? "text-rakit-200" : "text-gray-400"
+                        }`}
                 >
                     <span>{message.time}</span>
                     {isMe && (

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Head, Link, router } from "@inertiajs/react";
+import { Head, Link, router, usePage } from "@inertiajs/react";
 import GuestLayout from "@/Layouts/GuestLayout";
 import {
     Search,
@@ -10,22 +10,31 @@ import {
     Truck,
     ShoppingBag,
     ChevronRight,
+    AlertCircle
 } from "lucide-react";
 import debounce from "lodash/debounce";
 
 export default function TransactionIndex({ transactions = [], filters = {} }) {
+    const { auth } = usePage().props;
+    const userRole = auth.user.role;
+
     const [searchQuery, setSearchQuery] = useState(filters?.search || "");
     const [activeTab, setActiveTab] = useState(filters?.tab || "all");
+
+    const getRouteName = (type, id = null) => {
+        const prefix = userRole === 'crafter' ? 'crafter.transactions' : 'customer.transactions';
+        return id ? route(`${prefix}.${type}`, id) : route(`${prefix}.${type}`);
+    };
 
     const handleSearch = useCallback(
         debounce((value) => {
             router.get(
-                route("transactions.index"),
+                getRouteName('index'),
                 { search: value, tab: activeTab },
                 { preserveState: true, replace: true }
             );
         }, 500),
-        [activeTab]
+        [activeTab, userRole]
     );
 
     const onSearchChange = (e) => {
@@ -36,7 +45,7 @@ export default function TransactionIndex({ transactions = [], filters = {} }) {
     const handleTabChange = (tab) => {
         setActiveTab(tab);
         router.get(
-            route("transactions.index"),
+            getRouteName('index'),
             { search: searchQuery, tab: tab },
             { preserveState: true }
         );
@@ -45,10 +54,16 @@ export default function TransactionIndex({ transactions = [], filters = {} }) {
     const getStatusInfo = (status) => {
         switch (status) {
             case "pending": return { color: "text-yellow-700 bg-yellow-50 border-yellow-200", icon: Clock, label: "Menunggu Pembayaran" };
-            case "processing": return { color: "text-blue-700 bg-blue-50 border-blue-200", icon: Package, label: "Sedang Diproses" };
+            case "processing":
+            case "on_progress": return { color: "text-blue-700 bg-blue-50 border-blue-200", icon: Package, label: "Sedang Diproses" };
             case "shipping": return { color: "text-purple-700 bg-purple-50 border-purple-200", icon: Truck, label: "Dalam Pengiriman" };
-            case "done": return { color: "text-green-700 bg-green-50 border-green-200", icon: CheckCircle, label: "Selesai" };
-            case "cancelled": return { color: "text-red-700 bg-red-50 border-red-200", icon: XCircle, label: "Dibatalkan" };
+            case "done":
+            case "completed": return { color: "text-green-700 bg-green-50 border-green-200", icon: CheckCircle, label: "Selesai" };
+            case "cancelled":
+            case "rejected":
+            case "ditolak":
+                return { color: "text-red-700 bg-red-50 border-red-200", icon: XCircle, label: "Ditolak / Batal" };
+
             default: return { color: "text-gray-700 bg-gray-50 border-gray-200", icon: Clock, label: status };
         }
     };
@@ -81,12 +96,13 @@ export default function TransactionIndex({ transactions = [], filters = {} }) {
                     </div>
 
                     {/* Filter Tabs */}
-                    <div className="border-b border-gray-200 mb-8">
+                    <div className="border-b border-gray-200 mb-8 overflow-x-auto no-scrollbar">
                         <nav className="-mb-px flex gap-8" aria-label="Tabs">
                             {[
                                 { id: "all", label: "Semua Pesanan" },
                                 { id: "active", label: "Sedang Berjalan" },
-                                { id: "done", label: "Selesai" }
+                                { id: "done", label: "Selesai" },
+                                { id: "rejected", label: "Ditolak / Batal" }
                             ].map((tab) => (
                                 <button
                                     key={tab.id}
@@ -106,20 +122,28 @@ export default function TransactionIndex({ transactions = [], filters = {} }) {
                     <div className="space-y-4">
                         {transactions.length === 0 ? (
                             <div className="text-center py-12 bg-white rounded-2xl border border-gray-200 border-dashed">
-                                <Package className="mx-auto h-12 w-12 text-gray-300 mb-3" />
-                                <h3 className="text-lg font-medium text-gray-900">Belum ada transaksi</h3>
-                                <p className="text-gray-500">Pesanan Anda akan muncul di sini.</p>
+                                <div className="mx-auto w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                                    {activeTab === 'rejected' ? <XCircle className="text-gray-400" size={32} /> : <Package className="text-gray-400" size={32} />}
+                                </div>
+                                <h3 className="text-lg font-medium text-gray-900">
+                                    {activeTab === 'rejected' ? 'Tidak ada pesanan ditolak' : 'Belum ada transaksi'}
+                                </h3>
+                                <p className="text-gray-500 mt-1">
+                                    {activeTab === 'rejected' ? 'Semua pesanan Anda berjalan lancar.' : 'Pesanan Anda akan muncul di sini.'}
+                                </p>
                             </div>
                         ) : (
                             transactions.map((trx) => {
                                 const statusInfo = getStatusInfo(trx.status);
                                 const StatusIcon = statusInfo.icon;
+                                const isRejected = ['rejected', 'ditolak', 'cancelled'].includes(trx.status);
 
                                 return (
                                     <Link
                                         key={trx.id}
-                                        href={route('transactions.show', trx.original_id)}
-                                        className="block group bg-white border border-gray-200 rounded-2xl p-6 hover:border-rakit-300 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5"
+                                        href={getRouteName('show', trx.original_id)}
+                                        className={`block group bg-white border rounded-2xl p-6 transition-all duration-300 transform hover:-translate-y-0.5 ${isRejected ? 'border-red-200 hover:border-red-300 hover:shadow-red-50' : 'border-gray-200 hover:border-rakit-300 hover:shadow-lg'
+                                            }`}
                                     >
                                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                                             <div className="flex items-start gap-5 flex-1">
@@ -140,6 +164,13 @@ export default function TransactionIndex({ transactions = [], filters = {} }) {
                                                         {trx.item_name}
                                                     </h3>
                                                     <p className="text-sm text-gray-500 truncate">{trx.specs}</p>
+
+                                                    {/* Info Status Ditolak */}
+                                                    {isRejected && (
+                                                        <p className="text-xs text-red-500 mt-2 flex items-center gap-1 font-medium">
+                                                            <AlertCircle size={12} /> Pesanan Ditolak / Dibatalkan
+                                                        </p>
+                                                    )}
                                                 </div>
                                             </div>
 

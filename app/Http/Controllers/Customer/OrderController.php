@@ -16,17 +16,16 @@ class OrderController extends Controller
         $user = Auth::user();
 
         $orders = Project::where('customer_id', $user->id)
-            ->with(['crafter'])
+            ->with(['crafter', 'crafter.crafterProfile'])
             ->latest()
             ->get()
             ->map(function ($project) {
-                $statusLabel = $this->mapStatus($project->status);
-
-                $progress = $project->progress ?? 0;
-
-                $config = is_string($project->specifications)
-                    ? json_decode($project->specifications, true)
-                    : $project->specifications;
+                $config = [];
+                if ($project->specifications) {
+                    $config = is_string($project->specifications)
+                        ? json_decode($project->specifications, true)
+                        : $project->specifications;
+                }
 
                 return [
                     'id' => 'INV-' . $project->created_at->format('ym') . '-' . str_pad($project->id, 4, '0', STR_PAD_LEFT),
@@ -35,9 +34,9 @@ class OrderController extends Controller
                     'crafter' => $project->crafter->name ?? 'Menunggu Konfirmasi',
                     'date' => $project->created_at->format('d M Y'),
                     'price' => (int) $project->total_amount,
-                    'status' => $statusLabel,
-                    'progress' => $progress,
-
+                    'status' => $this->mapStatus($project->status),
+                    'progress' => $project->progress ?? 0,
+                    'reject_reason' => $project->reject_reason,
                     'config' => [
                         'width' => $config['width'] ?? 0,
                         'height' => $config['height'] ?? 0,
@@ -55,8 +54,8 @@ class OrderController extends Controller
                         ]
                     ],
                     'specs' => [
-                        'material' => $config['base_material'] ?? '-',
-                        'finish' => $config['finish_material'] ?? '-',
+                        'material' => $config['components']['base']['name'] ?? ($config['base_material'] ?? '-'),
+                        'finish' => $config['components']['finish']['name'] ?? ($config['finish_material'] ?? '-'),
                     ]
                 ];
             });
@@ -73,9 +72,12 @@ class OrderController extends Controller
             ->with(['crafter.crafterProfile'])
             ->firstOrFail();
 
-        $config = is_string($project->specifications)
-            ? json_decode($project->specifications, true)
-            : $project->specifications;
+        $config = [];
+        if ($project->specifications) {
+            $config = is_string($project->specifications)
+                ? json_decode($project->specifications, true)
+                : $project->specifications;
+        }
 
         $statusLabel = $this->mapStatus($project->status);
 
@@ -112,12 +114,37 @@ class OrderController extends Controller
             ]
         ];
 
+        if ($project->status === 'rejected') {
+            $timeline = [
+                [
+                    'stage' => "Pesanan Dibuat",
+                    'date' => $project->created_at->format('d M Y'),
+                    'status' => 'completed',
+                    'updates' => []
+                ],
+                [
+                    'stage' => "Ditolak oleh Pengrajin",
+                    'date' => $project->updated_at->format('d M Y'),
+                    'status' => 'rejected',
+                    'updates' => [
+                        [
+                            'date' => $project->updated_at->format('H:i'),
+                            'note' => "Alasan: " . ($project->reject_reason ?? '-'),
+                            'photo' => null
+                        ]
+                    ]
+                ]
+            ];
+        }
+
         $orderData = [
             'id' => 'INV-' . $project->created_at->format('ym') . '-' . str_pad($project->id, 4, '0', STR_PAD_LEFT),
+            'original_id' => $project->id,
             'status' => $statusLabel,
             'purchaseDate' => $project->created_at->format('d M Y'),
             'totalPrice' => (int) $project->total_amount,
             'progress' => $project->progress ?? 0,
+            'reject_reason' => $project->reject_reason,
 
             'crafter' => [
                 'name' => $project->crafter->name ?? 'Menunggu Konfirmasi',
@@ -139,8 +166,8 @@ class OrderController extends Controller
                 'doorType' => $config['doorType'] ?? 'none',
                 'lock' => $config['lock'] ?? false,
                 'components' => [
-                    'base' => ['name' => $config['base_material'] ?? '-'],
-                    'finish' => ['name' => $config['finish_material'] ?? '-'],
+                    'base' => ['name' => $config['components']['base']['name'] ?? ($config['base_material'] ?? '-')],
+                    'finish' => ['name' => $config['components']['finish']['name'] ?? ($config['finish_material'] ?? '-')],
                 ],
                 'finishingLayer' => [
                     'id' => 'custom',
@@ -159,8 +186,8 @@ class OrderController extends Controller
                 'doorType' => $config['doorType'] ?? 'none',
                 'lock' => $config['lock'] ?? false,
                 'ledStrip' => $config['ledStrip'] ?? false,
-                'materialName' => $config['base_material'] ?? '-',
-                'finishing' => $config['finish_material'] ?? '-',
+                'materialName' => $config['components']['base']['name'] ?? ($config['base_material'] ?? '-'),
+                'finishing' => $config['components']['finish']['name'] ?? ($config['finish_material'] ?? '-'),
             ],
 
             'timeline' => $timeline
@@ -179,6 +206,7 @@ class OrderController extends Controller
             'shipping' => 'Pengiriman',
             'completed' => 'Selesai',
             'cancelled' => 'Dibatalkan',
+            'rejected' => 'Ditolak',
             default => ucfirst($status),
         };
     }
