@@ -812,7 +812,7 @@ export default function Dashboard({ reviews }) {
                             <motion.a
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
-                                href="/pengrajin"
+                                href="/crafters"
                                 className="w-full sm:w-auto px-10 py-5 rounded-2xl border border-white/20 text-white font-bold hover:bg-white/10 transition flex items-center justify-center gap-3 backdrop-blur-sm"
                             >
                                 <Users size={20} />
