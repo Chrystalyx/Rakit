@@ -7,6 +7,7 @@ import DeleteUserForm from "./Partials/DeleteUserForm";
 import UpdatePasswordForm from "./Partials/UpdatePasswordForm";
 import UpdateProfileInformationForm from "./Partials/UpdateProfileInformationForm";
 import { Toaster } from "react-hot-toast";
+import GuestLayout from "@/Layouts/GuestLayout";
 
 export default function Edit({ mustVerifyEmail, status }) {
     const user = usePage().props.auth.user;
@@ -47,7 +48,7 @@ export default function Edit({ mustVerifyEmail, status }) {
     };
 
     return (
-        <AuthenticatedLayout
+        <GuestLayout
             header={
                 <h2 className="text-2xl font-bold text-gray-800">
                     Pengaturan Akun
@@ -165,6 +166,6 @@ export default function Edit({ mustVerifyEmail, status }) {
                     </div>
                 </div>
             </div>
-        </AuthenticatedLayout>
+        </GuestLayout>
     );
 }
