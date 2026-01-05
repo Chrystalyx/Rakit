@@ -11,7 +11,21 @@ class Portfolio extends Model
 
     protected $guarded = ['id'];
 
+    protected $fillable = [
+        'crafter_profile_id',
+        'title',
+        'project_value',
+        'image_path',
+        'category',
+        'description',
+        'config',
+        'specs',
+        'images'
+    ];
+
     protected $casts = [
+        'config' => 'array',
+        'specs' => 'array',
         'images' => 'array',
     ];
 

@@ -22,6 +22,8 @@ use App\Http\Controllers\Admin\CrafterController as AdminCrafterController;
 
 use App\Http\Controllers\Crafter\DashboardController as CrafterDashboardController;
 use App\Http\Controllers\Crafter\PublicCrafterController;
+use App\Http\Controllers\Crafter\ProfileController as CrafterProfileController;
+use App\Http\Controllers\Crafter\PortfolioController;
 
 use App\Http\Controllers\Customer\OrderController as CustomerOrderController;
 use App\Http\Controllers\Customer\CheckoutController;
@@ -85,6 +87,14 @@ Route::middleware(['auth', 'verified', 'role:crafter'])->prefix('crafter')->name
     Route::get('/portfolio', [CrafterDashboardController::class, 'portfolio'])->name('portfolio');
     Route::get('/projectlist', [CrafterDashboardController::class, 'projectList'])->name('projectlist');
     Route::get('/project/{id}', [CrafterDashboardController::class, 'show'])->name('project.detail');
+
+    Route::post('/profile/avatar', [CrafterProfileController::class, 'updateAvatar'])->name('profile.avatar');
+    Route::post('/profile/cover', [CrafterProfileController::class, 'updateCover'])->name('profile.cover');
+    Route::post('/profile/bio', [CrafterProfileController::class, 'updateBio'])->name('profile.bio');
+    
+    Route::post('/portfolio', [PortfolioController::class, 'store'])->name('portfolio.store');
+    Route::post('/portfolio/{id}', [PortfolioController::class, 'update'])->name('portfolio.update');
+    Route::delete('/portfolio/{id}', [PortfolioController::class, 'destroy'])->name('portfolio.delete');
 
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
     Route::get('/transaction/{id}', [TransactionController::class, 'show'])->name('transactions.show');

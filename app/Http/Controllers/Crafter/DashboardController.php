@@ -8,6 +8,7 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Project;
 use App\Models\User;
+use App\Models\CrafterProfile;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -16,7 +17,7 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        $profile = \App\Models\CrafterProfile::where('user_id', $user->id)->first();
+        $profile = CrafterProfile::where('user_id', $user->id)->first();
 
         $activeProjectsCount = Project::where('crafter_id', $user->id)
             ->where('status', 'on_progress')
@@ -88,6 +89,8 @@ class DashboardController extends Controller
             ->where('crafter_id', $user->id)
             ->findOrFail($id);
 
+        $specs = $project->specifications ?? [];
+
         $projectData = [
             'id' => $project->id,
             'title' => $project->title,
@@ -101,18 +104,18 @@ class DashboardController extends Controller
             'fee' => (int) $project->platform_fee,
 
             'specs' => [
-                'width' => 200,
-                'height' => 220,
-                'depth' => 60,
-                'plinth' => 10,
-                'backPanel' => true,
-                'partitions' => 4,
-                'shelves' => 8,
-                'ledStrip' => true,
-                'doorType' => 'swing',
-                'lock' => true,
-                'materialName' => 'Multiplek 18mm',
-                'finishing' => 'HPL Taco (Custom)',
+                'width' => $specs['width'] ?? 0,
+                'height' => $specs['height'] ?? 0,
+                'depth' => $specs['depth'] ?? 0,
+                'plinth' => $specs['plinth'] ?? 0,
+                'backPanel' => $specs['backPanel'] ?? true,
+                'partitions' => $specs['partitions'] ?? 0,
+                'shelves' => $specs['shelves'] ?? 0,
+                'ledStrip' => $specs['ledStrip'] ?? false,
+                'doorType' => ucfirst($specs['doorType'] ?? 'None'),
+                'lock' => $specs['lock'] ?? false,
+                'materialName' => $specs['components']['base']['name'] ?? 'Custom',
+                'finishing' => $specs['components']['finish']['name'] ?? 'Custom',
             ],
 
             'timeline' => [
@@ -155,6 +158,7 @@ class DashboardController extends Controller
             'role' => 'Pengrajin Kayu',
             'address' => $user->crafterProfile->address ?? '-',
             'avatar' => $user->avatar,
+            'cover_image' => $user->crafterProfile->cover_image,
             'bio' => $user->crafterProfile->bio ?? '',
             'skills' => $user->crafterProfile->skills ? json_decode($user->crafterProfile->skills) : [],
             'reviewCount' => 0,
@@ -163,8 +167,13 @@ class DashboardController extends Controller
                 return [
                     'id' => $p->id,
                     'title' => $p->title,
-                    'category' => 'Furniture',
-                    'images' => is_array($p->images) ? $p->images : [$p->image_url],
+                    'category' => $p->category,
+                    'description' => $p->description,
+                    'specs' => $p->specs,
+                    'config' => $p->config,
+                    'date' => $p->created_at->format('d M Y'),
+                    'images' => is_array($p->images) ? $p->images : [],
+                    'realPhotos' => is_array($p->images) ? $p->images : [],
                     'image' => $p->image_url
                 ];
             }),
