@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Project;
 use App\Models\User;
+use App\Models\ProjectRejection;
 use App\Notifications\ProjectNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -36,7 +37,7 @@ class ProjectController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
         $user->notify(new ProjectNotification($project, 'submitted'));
-        
+
         if ($project->crafter_id) {
             $crafter = User::find($project->crafter_id);
             if ($crafter) {
@@ -65,22 +66,32 @@ class ProjectController extends Controller
         return back()->with('success', 'Proyek diterima. Menunggu pembayaran DP dari Customer.');
     }
 
-    public function reject($id)
+    public function reject(Request $request, $id)
     {
+        $request->validate([
+            'reason' => 'required|string|max:500',
+        ]);
+
         $project = Project::findOrFail($id);
 
         if ($project->crafter_id !== Auth::id()) {
-            abort(403, 'Anda tidak memiliki akses untuk menolak proyek ini.');
+            abort(403);
         }
 
-        $project->update(['status' => 'rejected']);
+        ProjectRejection::create([
+            'project_id' => $project->id,
+            'crafter_id' => Auth::id(),
+            'reason' => $request->reason
+        ]);
 
-        $customer = User::find($project->customer_id);
-        if ($customer) {
-            $customer->notify(new ProjectNotification($project, 'rejected'));
-        }
+        $project->update([
+            'status' => 'rejected',
+            'reject_reason' => $request->reason
+        ]);
 
-        return back()->with('success', 'Proyek telah ditolak.');
+        $project->customer->notify(new ProjectNotification($project, 'rejected', $request->reason));
+
+        return redirect()->back();
     }
 
     public function updateProgress(Request $request, $id)

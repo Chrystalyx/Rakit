@@ -1,17 +1,7 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-    X,
-    Clock,
-    MapPin,
-    User,
-    Ruler,
-    Layers,
-    Palette,
-    DoorOpen,
-    Box,
-    ShieldCheck,
-    FileText,
+    X, Clock, MapPin, User, Ruler, Layers, Palette, DoorOpen, Box, ShieldCheck, FileText,
 } from "lucide-react";
 
 export default function BursaModal({
@@ -21,12 +11,11 @@ export default function BursaModal({
     onAccept,
     onReject,
 }) {
-    // Helper Format Rupiah
-    const formatRp = (val) => new Intl.NumberFormat("id-ID").format(val);
+    if (!isOpen || !request) return null;
 
     return (
         <AnimatePresence>
-            {isOpen && request && (
+            {isOpen && (
                 <>
                     {/* 1. BACKDROP */}
                     <motion.div
@@ -54,8 +43,7 @@ export default function BursaModal({
                                             Penawaran Baru
                                         </span>
                                         <span className="flex items-center gap-1 text-[10px] text-gray-400 font-medium">
-                                            <Clock size={10} /> Diposting 2 jam
-                                            lalu
+                                            <Clock size={10} /> Diposting {request.created_at_human}
                                         </span>
                                     </div>
                                     <h2 className="text-xl font-bold text-gray-900 leading-tight">
@@ -79,37 +67,23 @@ export default function BursaModal({
                                         <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
                                             <div className="flex items-center gap-3 mb-3">
                                                 <img
-                                                    src={
-                                                        request.customer
-                                                            ?.avatar ||
-                                                        "https://ui-avatars.com/api/?name=User&background=random"
-                                                    }
+                                                    src={request.customer.avatar}
                                                     alt="Customer"
-                                                    className="w-10 h-10 rounded-full border border-gray-100"
+                                                    className="w-10 h-10 rounded-full border border-gray-100 object-cover"
                                                 />
                                                 <div>
                                                     <h4 className="font-bold text-gray-900 text-sm">
-                                                        {request.customer
-                                                            ?.name ||
-                                                            "Nama Customer"}
+                                                        {request.customer.name}
                                                     </h4>
                                                     <div className="flex items-center gap-1 text-green-600 text-[10px] font-bold">
-                                                        <ShieldCheck
-                                                            size={10}
-                                                        />{" "}
-                                                        Verified Buyer
+                                                        <ShieldCheck size={10} /> Verified Buyer
                                                     </div>
                                                 </div>
                                             </div>
                                             <div className="flex items-start gap-2 text-xs text-gray-500 bg-gray-50 p-2 rounded-lg">
-                                                <MapPin
-                                                    size={14}
-                                                    className="shrink-0 mt-0.5"
-                                                />
+                                                <MapPin size={14} className="shrink-0 mt-0.5" />
                                                 <p className="leading-relaxed">
-                                                    {request.customer
-                                                        ?.address ||
-                                                        "Alamat lengkap customer akan muncul di sini..."}
+                                                    {request.customer.address}
                                                 </p>
                                             </div>
                                         </div>
@@ -131,13 +105,10 @@ export default function BursaModal({
                                         </div>
                                     </div>
 
-                                    {/* B. SPESIFIKASI TEKNIS (Sesuai Configurator) */}
+                                    {/* B. SPESIFIKASI TEKNIS */}
                                     <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                                         <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
-                                            <FileText
-                                                size={16}
-                                                className="text-gray-500"
-                                            />
+                                            <FileText size={16} className="text-gray-500" />
                                             <h3 className="font-bold text-gray-800 text-sm">
                                                 Spesifikasi Pesanan
                                             </h3>
@@ -151,35 +122,16 @@ export default function BursaModal({
                                                 </h4>
                                                 <ul className="space-y-1 text-sm text-gray-700 font-medium">
                                                     <li className="flex justify-between border-b border-dashed border-gray-100 pb-1">
-                                                        <span>
-                                                            Lebar (Panjang)
-                                                        </span>{" "}
-                                                        <span>
-                                                            {request.specs
-                                                                ?.width ||
-                                                                0}{" "}
-                                                            cm
-                                                        </span>
+                                                        <span>Lebar (Panjang)</span>
+                                                        <span>{request.specs.width} cm</span>
                                                     </li>
                                                     <li className="flex justify-between border-b border-dashed border-gray-100 pb-1">
-                                                        <span>
-                                                            Tinggi Total
-                                                        </span>{" "}
-                                                        <span>
-                                                            {request.specs
-                                                                ?.height ||
-                                                                0}{" "}
-                                                            cm
-                                                        </span>
+                                                        <span>Tinggi Total</span>
+                                                        <span>{request.specs.height} cm</span>
                                                     </li>
                                                     <li className="flex justify-between border-b border-dashed border-gray-100 pb-1">
-                                                        <span>Kedalaman</span>{" "}
-                                                        <span>
-                                                            {request.specs
-                                                                ?.depth ||
-                                                                0}{" "}
-                                                            cm
-                                                        </span>
+                                                        <span>Kedalaman</span>
+                                                        <span>{request.specs.depth} cm</span>
                                                     </li>
                                                 </ul>
                                             </div>
@@ -187,31 +139,17 @@ export default function BursaModal({
                                             {/* 2. Material & Finish */}
                                             <div>
                                                 <h4 className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
-                                                    <Layers size={12} />{" "}
-                                                    Material
+                                                    <Layers size={12} /> Material
                                                 </h4>
                                                 <div className="space-y-2 text-sm">
                                                     <div className="bg-gray-50 p-2 rounded-lg border border-gray-100">
-                                                        <span className="text-xs text-gray-400 block">
-                                                            Base Material
-                                                        </span>
-                                                        <span className="font-bold text-gray-800">
-                                                            {request.specs
-                                                                ?.baseMaterial ||
-                                                                "Multiplek"}
-                                                        </span>
+                                                        <span className="text-xs text-gray-400 block">Base Material</span>
+                                                        <span className="font-bold text-gray-800">{request.specs.baseMaterial}</span>
                                                     </div>
                                                     <div className="bg-gray-50 p-2 rounded-lg border border-gray-100">
-                                                        <span className="text-xs text-gray-400 block">
-                                                            Finishing
-                                                        </span>
+                                                        <span className="text-xs text-gray-400 block">Finishing</span>
                                                         <span className="font-bold text-gray-800 flex items-center gap-1">
-                                                            <Palette
-                                                                size={12}
-                                                            />{" "}
-                                                            {request.specs
-                                                                ?.finishing ||
-                                                                "HPL Taco"}
+                                                            <Palette size={12} /> {request.specs.finishing}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -224,33 +162,16 @@ export default function BursaModal({
                                                 </h4>
                                                 <ul className="space-y-1 text-sm text-gray-700 font-medium">
                                                     <li className="flex justify-between">
-                                                        <span>
-                                                            Sekat Vertikal
-                                                        </span>{" "}
-                                                        <span>
-                                                            {request.specs
-                                                                ?.partitions ||
-                                                                0}{" "}
-                                                            Unit
-                                                        </span>
+                                                        <span>Sekat Vertikal</span>
+                                                        <span>{request.specs.partitions} Unit</span>
                                                     </li>
                                                     <li className="flex justify-between">
-                                                        <span>Ambalan</span>{" "}
-                                                        <span>
-                                                            {request.specs
-                                                                ?.shelves ||
-                                                                0}{" "}
-                                                            Unit
-                                                        </span>
+                                                        <span>Ambalan</span>
+                                                        <span>{request.specs.shelves} Unit</span>
                                                     </li>
                                                     <li className="flex justify-between">
-                                                        <span>Lampu LED</span>{" "}
-                                                        <span>
-                                                            {request.specs
-                                                                ?.ledStrip
-                                                                ? "Ya"
-                                                                : "Tidak"}
-                                                        </span>
+                                                        <span>Lampu LED</span>
+                                                        <span>{request.specs.ledStrip ? "Ya" : "Tidak"}</span>
                                                     </li>
                                                 </ul>
                                             </div>
@@ -258,38 +179,20 @@ export default function BursaModal({
                                             {/* 4. Pintu & Aksesoris */}
                                             <div>
                                                 <h4 className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
-                                                    <DoorOpen size={12} />{" "}
-                                                    Aksesoris
+                                                    <DoorOpen size={12} /> Aksesoris
                                                 </h4>
                                                 <ul className="space-y-1 text-sm text-gray-700 font-medium">
                                                     <li className="flex justify-between">
-                                                        <span>Tipe Pintu</span>{" "}
-                                                        <span className="capitalize">
-                                                            {request.specs
-                                                                ?.doorType ||
-                                                                "None"}
-                                                        </span>
+                                                        <span>Tipe Pintu</span>
+                                                        <span className="capitalize">{request.specs.doorType}</span>
                                                     </li>
                                                     <li className="flex justify-between">
-                                                        <span>
-                                                            Kunci Pengaman
-                                                        </span>{" "}
-                                                        <span>
-                                                            {request.specs?.lock
-                                                                ? "Ya"
-                                                                : "Tidak"}
-                                                        </span>
+                                                        <span>Kunci Pengaman</span>
+                                                        <span>{request.specs.lock ? "Ya" : "Tidak"}</span>
                                                     </li>
                                                     <li className="flex justify-between">
-                                                        <span>
-                                                            Tinggi Plint
-                                                        </span>{" "}
-                                                        <span>
-                                                            {request.specs
-                                                                ?.plinth ||
-                                                                0}{" "}
-                                                            cm
-                                                        </span>
+                                                        <span>Tinggi Plint</span>
+                                                        <span>{request.specs.plinth} cm</span>
                                                     </li>
                                                 </ul>
                                             </div>
@@ -305,15 +208,13 @@ export default function BursaModal({
                                         onClick={onReject}
                                         className="w-full py-3.5 px-4 rounded-xl border-2 border-red-100 bg-white text-red-600 font-bold text-sm hover:bg-red-50 hover:border-red-200 transition shadow-sm flex items-center justify-center gap-2"
                                     >
-                                        <X size={18} />
-                                        Tolak Tawaran
+                                        <X size={18} /> Tolak Tawaran
                                     </button>
                                     <button
                                         onClick={onAccept}
                                         className="w-full py-3.5 px-4 rounded-xl bg-green-600 text-white font-bold text-sm hover:bg-green-700 transition shadow-lg shadow-green-600/20 flex items-center justify-center gap-2"
                                     >
-                                        <ShieldCheck size={18} />
-                                        Terima Proyek
+                                        <ShieldCheck size={18} /> Terima Proyek
                                     </button>
                                 </div>
                             </div>

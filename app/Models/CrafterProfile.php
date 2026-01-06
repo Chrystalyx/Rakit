@@ -13,17 +13,23 @@ class CrafterProfile extends Model
 
     protected $fillable = [
         'user_id',
+        'level',
         'ktp_number',
         'address',
-        'level',
+        'photo_path',
         'is_verified',
         'rating_skill',
+        'badges',
+        'bio',
+        'cover_image',
+        'skills'
     ];
 
     protected $casts = [
         'badges' => 'array',
         'is_verified' => 'boolean',
         'rating_skill' => 'decimal:2',
+        'skills' => 'array',
     ];
 
     public function user()

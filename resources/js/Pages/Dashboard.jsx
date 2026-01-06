@@ -22,7 +22,6 @@ import {
     PenTool,
 } from "lucide-react";
 
-// --- Komponen FAQ Item ---
 const FaqItem = ({ question, answer }) => {
     const [isOpen, setIsOpen] = useState(false);
 
@@ -33,9 +32,8 @@ const FaqItem = ({ question, answer }) => {
                 className="flex items-center justify-between w-full py-6 text-left focus:outline-none"
             >
                 <span
-                    className={`text-lg font-medium ${
-                        isOpen ? "text-rakit-500" : "text-rakit-800"
-                    } transition-colors`}
+                    className={`text-lg font-medium ${isOpen ? "text-rakit-500" : "text-rakit-800"
+                        } transition-colors`}
                 >
                     {question}
                 </span>
@@ -64,23 +62,18 @@ const FaqItem = ({ question, answer }) => {
 };
 
 export default function Dashboard({ reviews }) {
-    // --- State & Auth Logic ---
     const { auth } = usePage().props;
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
-    // Logic Data Testimonial
     const testimonialData = reviews && reviews.length > 0 ? reviews : [];
 
-    // Duplicate data agar marquee berjalan mulus jika data sedikit
-    // Jika data ada (misal 1-4), kita duplikasi agar animasi loop tidak patah
     const marqueeData =
         testimonialData.length > 0 && testimonialData.length < 5
             ? [...testimonialData, ...testimonialData, ...testimonialData]
             : testimonialData.length > 0
-            ? [...testimonialData, ...testimonialData]
-            : [];
+                ? [...testimonialData, ...testimonialData]
+                : [];
 
-    // Fungsi Handle Click Button Review
     const handleAddReview = () => {
         if (!auth.user) {
             toast.error("Silakan login terlebih dahulu untuk menulis ulasan.", {
@@ -95,7 +88,6 @@ export default function Dashboard({ reviews }) {
         }
     };
 
-    // --- Variabel Animasi Hero ---
     const containerVariants = {
         hidden: { opacity: 0 },
         visible: {
@@ -127,7 +119,6 @@ export default function Dashboard({ reviews }) {
         },
     };
 
-    // --- Variabel Animasi Section Lain ---
     const fadeInUp = {
         hidden: { opacity: 0, y: 30 },
         visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
@@ -400,11 +391,9 @@ export default function Dashboard({ reviews }) {
                                     <div className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 w-[1px] h-12 bg-white/10 -mr-4"></div>
                                 )}
                                 <div
-                                    className={`mx-auto md:mx-0 w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mb-4 ${
-                                        stat.color
-                                    } group-hover:scale-110 group-hover:bg-white/10 transition-all duration-300 ring-1 ring-white/10 group-hover:ring-${
-                                        stat.color.split("-")[1]
-                                    }-500/50`}
+                                    className={`mx-auto md:mx-0 w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mb-4 ${stat.color
+                                        } group-hover:scale-110 group-hover:bg-white/10 transition-all duration-300 ring-1 ring-white/10 group-hover:ring-${stat.color.split("-")[1]
+                                        }-500/50`}
                                 >
                                     {stat.icon}
                                 </div>
@@ -630,7 +619,6 @@ export default function Dashboard({ reviews }) {
                             animate={{ x: ["0%", "-50%"] }}
                             transition={{
                                 ease: "linear",
-                                // Durasi dinamis: semakin banyak review, semakin lama (agar kecepatan tetap wajar)
                                 duration: marqueeData.length * 5,
                                 repeat: Infinity,
                             }}
@@ -824,7 +812,7 @@ export default function Dashboard({ reviews }) {
                             <motion.a
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
-                                href="/pengrajin"
+                                href="/crafters"
                                 className="w-full sm:w-auto px-10 py-5 rounded-2xl border border-white/20 text-white font-bold hover:bg-white/10 transition flex items-center justify-center gap-3 backdrop-blur-sm"
                             >
                                 <Users size={20} />

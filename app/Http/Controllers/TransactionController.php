@@ -20,9 +20,11 @@ class TransactionController extends Controller
         }
 
         if ($request->tab === 'active') {
-            $query->whereIn('status', ['pending', 'processing', 'shipping']);
+            $query->whereIn('status', ['pending', 'processing', 'shipping', 'on_progress']);
         } elseif ($request->tab === 'done') {
-            $query->whereIn('status', ['done', 'cancelled']);
+            $query->whereIn('status', ['done', 'completed']);
+        } elseif ($request->tab === 'rejected') {
+            $query->whereIn('status', ['rejected', 'cancelled', 'ditolak']);
         }
 
         if ($request->search) {
@@ -35,6 +37,13 @@ class TransactionController extends Controller
         $transactions = $query->latest()
             ->get()
             ->map(function ($trx) {
+                $config = [];
+                if ($trx->specifications) {
+                    $config = is_string($trx->specifications)
+                        ? json_decode($trx->specifications, true)
+                        : $trx->specifications;
+                }
+
                 return [
                     'id' => $this->generateInvoiceCode($trx),
                     'original_id' => $trx->id,
@@ -42,7 +51,7 @@ class TransactionController extends Controller
                     'item_name' => $trx->title,
                     'total_price' => $trx->total_amount,
                     'status' => $trx->status,
-                    'specs' => $this->formatSpecsSummary($trx->specifications),
+                    'specs' => $this->formatSpecsSummary($config),
                 ];
             });
 
@@ -118,10 +127,14 @@ class TransactionController extends Controller
         return "TRX-{$year}{$month}-{$orderId}-{$crafterId}-{$customerId}";
     }
 
-    private function formatSpecsSummary($specs)
+    private function formatSpecsSummary($data)
     {
-        $data = is_array($specs) ? $specs : json_decode($specs, true);
         if (!$data) return '-';
-        return ($data['base_material'] ?? '') . ' • ' . ($data['finish_material'] ?? '');
+
+        $material = $data['components']['base']['name'] ?? ($data['base_material'] ?? 'Custom Material');
+        $finish = $data['components']['finish']['name'] ?? ($data['finish_material'] ?? 'Custom Finish');
+        $dimensi = isset($data['width']) ? "{$data['width']}x{$data['height']}cm" : '';
+
+        return "{$material} • {$finish} " . ($dimensi ? "• {$dimensi}" : "");
     }
 }

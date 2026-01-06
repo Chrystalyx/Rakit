@@ -9,7 +9,6 @@ export default function BaseLegalModal({
     icon: Icon,
     children,
 }) {
-    // Kunci scroll body saat modal terbuka
     useEffect(() => {
         if (isOpen) document.body.style.overflow = "hidden";
         else document.body.style.overflow = "unset";

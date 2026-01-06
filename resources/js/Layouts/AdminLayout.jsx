@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Link, usePage } from "@inertiajs/react";
 
-// Ikon SVG (Langsung di-embed agar tidak perlu install library tambahan)
 const Icons = {
     Dashboard: () => (
         <svg
@@ -111,20 +110,19 @@ const Icons = {
 };
 
 export default function AdminLayout({ children, user }) {
-    const { url } = usePage(); // Untuk mendeteksi halaman aktif
+    const { url } = usePage();
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
-    // Daftar Menu Navigasi
     const navigation = [
         { name: "Analytics", href: "/admin/analytics", icon: Icons.Dashboard },
-        { name: "Materials", href: "/admin/materials", icon: Icons.Materials }, // Database harga
-        { name: "Orders", href: "/admin/orders", icon: Icons.Orders }, // Kelola proyek & RAB
+        { name: "Materials", href: "/admin/materials", icon: Icons.Materials },
+        { name: "Orders", href: "/admin/orders", icon: Icons.Orders },
         {
             name: "Verification",
             href: "/admin/verification",
             icon: Icons.Verification,
-        }, // Kurasi Mitra [cite: 42]
-        { name: "Crafters", href: "/admin/crafters", icon: Icons.Crafters }, // Daftar Teknisi [cite: 28]
+        },
+        { name: "Crafters", href: "/admin/crafters", icon: Icons.Crafters },
     ];
 
     return (
@@ -139,9 +137,8 @@ export default function AdminLayout({ children, user }) {
 
             {/* --- SIDEBAR NAVIGATION --- */}
             <aside
-                className={`fixed inset-y-0 left-0 z-30 w-64 transform bg-white border-r border-gray-200 transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
-                    sidebarOpen ? "translate-x-0" : "-translate-x-full"
-                }`}
+                className={`fixed inset-y-0 left-0 z-30 w-64 transform bg-white border-r border-gray-200 transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+                    }`}
             >
                 {/* Logo Area */}
                 <div className="flex items-center justify-center h-20 border-b border-gray-100 bg-white">
@@ -163,25 +160,22 @@ export default function AdminLayout({ children, user }) {
                     </p>
 
                     {navigation.map((item) => {
-                        // Cek apakah link ini sedang aktif
                         const isActive = url.startsWith(item.href);
 
                         return (
                             <Link
                                 key={item.name}
                                 href={item.href}
-                                className={`flex items-center px-4 py-3 rounded-xl transition-all duration-200 group ${
-                                    isActive
-                                        ? "bg-indigo-50 text-indigo-600 shadow-sm font-semibold"
-                                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                                }`}
+                                className={`flex items-center px-4 py-3 rounded-xl transition-all duration-200 group ${isActive
+                                    ? "bg-indigo-50 text-indigo-600 shadow-sm font-semibold"
+                                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                                    }`}
                             >
                                 <span
-                                    className={`mr-3 transition-colors ${
-                                        isActive
-                                            ? "text-indigo-600"
-                                            : "text-gray-400 group-hover:text-gray-600"
-                                    }`}
+                                    className={`mr-3 transition-colors ${isActive
+                                        ? "text-indigo-600"
+                                        : "text-gray-400 group-hover:text-gray-600"
+                                        }`}
                                 >
                                     <item.icon />
                                 </span>

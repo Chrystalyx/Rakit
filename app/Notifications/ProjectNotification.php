@@ -13,14 +13,16 @@ class ProjectNotification extends Notification
 
     private $project;
     private $type;
+    private $reason;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct($project, $type)
+    public function __construct($project, $type, $reason = null)
     {
         $this->project = $project;
         $this->type = $type;
+        $this->reason = $reason;
     }
 
     /**
@@ -72,25 +74,26 @@ class ProjectNotification extends Notification
             case 'submitted':
                 $data['title'] = 'Proyek Berhasil Diajukan';
                 $data['message'] = "Proyek '{$this->project->title}' menunggu respon Crafter.";
-                $data['url'] = route('customer.dashboard');
+                $data['url'] = route('customer.orders.index');
                 break;
 
             case 'accepted':
                 $data['title'] = 'Proyek Diterima!';
                 $data['message'] = "Crafter telah menerima proyek '{$this->project->title}'. Silakan lakukan pembayaran DP.";
-                $data['url'] = route('customer.dashboard');
+                $data['url'] = route('customer.orders.show', $this->project->id);
                 break;
 
             case 'rejected':
-                $data['title'] = 'Proyek Ditolak';
-                $data['message'] = "Maaf, Crafter tidak bisa mengerjakan proyek '{$this->project->title}' saat ini.";
-                $data['url'] = route('customer.dashboard');
+                $data['title'] = 'Tawaran Ditolak';
+                $reasonMsg = $this->reason ? " Alasan: \"{$this->reason}\"" : "";
+                $data['message'] = "Mohon maaf, Crafter menolak proyek '{$this->project->title}'.{$reasonMsg}. Silakan pilih pengrajin lain.";
+                $data['url'] = route('customer.orders.index');
                 break;
 
             case 'progress_updated':
                 $data['title'] = 'Progress Proyek Update';
                 $data['message'] = "Ada update terbaru pada pengerjaan '{$this->project->title}'.";
-                $data['url'] = route('customer.dashboard');
+                $data['url'] = route('customer.orders.show', $this->project->id);
                 break;
         }
 
